@@ -4,7 +4,7 @@ import json
 import numpy as np
 from torch.utils.data import Dataset
 
-labels = ['circle', 'square', 'star', 'triangle']
+LABELS = ['circle', 'square', 'star', 'triangle']
 
 class SegDataset(Dataset):
     def __init__(self, dir):
@@ -23,10 +23,11 @@ class SegDataset(Dataset):
         if img is None:
             raise FileNotFoundError(f"Image not found: {img_path}")
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-        shape_dicts = get_poly(ann_path)
+        
+        shape_dicts = get_poly(ann_path) 
         mask = create_multi_masks(img,shape_dicts)
 
+        img = np.transpose(img, (2, 0, 1))
         return img, mask
     
 def get_poly(ann_path):
@@ -37,12 +38,20 @@ def get_poly(ann_path):
 def create_multi_masks(im, shape_dicts):
     height, width, _ = im.shape
     channels = []
+
+    # class in mask
     cls = [x['label'] for x in shape_dicts]
+    
+    # points of each class
     poly = [np.array(x['points'], dtype=np.int32) for x in shape_dicts]
+
+    # dictionary where key:label, value:points
     label2poly = dict(zip(cls, poly))
+
+    # define background
     background = np.zeros(shape=(height, width), dtype=np.float32)
 
-    for i, label in enumerate(labels):
+    for label in LABELS:
         
         blank = np.zeros(shape=(height, width), dtype=np.float32)
         

@@ -76,7 +76,6 @@ class Unet(nn.Module):
         self.final_conv = FinalConv(64,n_classes)
 
     def forward(self, x):
-        x = x.permute(0,3,1,2)
         x1 = self.start_conv(x)
         x2 = self.down1(x1)
         x3 = self.down2(x2)
