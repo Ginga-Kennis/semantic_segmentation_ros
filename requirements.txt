@@ -1,0 +1,8 @@
+catkin_pkg
+numpy
+pytorch-ignite
+matplotlib
+tensorboard
+tqdm
+torch
+imgaug
