@@ -19,7 +19,7 @@ class SegDataset(Dataset):
         img_path = os.path.join(self.img_dir, self.imgs[idx])
         ann_path = os.path.join(self.ann_dir, self.imgs[idx].replace('.png', '.json').replace('.jpg', '.json'))
 
-        img = cv2.imread(img_path)
+        img = cv2.imread(img_path).astype(np.float32)
         if img is None:
             raise FileNotFoundError(f"Image not found: {img_path}")
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
