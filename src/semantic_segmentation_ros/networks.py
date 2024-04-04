@@ -13,3 +13,9 @@ def load_network(path, device):
     net = get_model(model_name).to(device)
     net.load_state_dict(torch.load(path, map_location=device))
     return net
+
+def load_model(path, device):
+    model_name = path.stem.split("_")[1]
+    net = get_model(model_name).to(device)
+    net.load_state_dict(torch.load(path, map_location=device))
+    return net

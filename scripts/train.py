@@ -9,7 +9,7 @@ from torch.utils import tensorboard
 
 from ignite.engine import Engine, Events, create_supervised_trainer, create_supervised_evaluator
 from ignite.contrib.handlers.tqdm_logger import ProgressBar
-from ignite.metrics import Accuracy, Loss
+from ignite.metrics import Loss
 from ignite.handlers import Checkpoint
 from ignite.contrib.handlers.tensorboard_logger import *
 
@@ -82,7 +82,7 @@ def parse_args():
     parser.add_argument("--batch-size", type=int, default=15)
     parser.add_argument("--val-split", type=float, default=0.1)
     parser.add_argument("--lr", type=float, default=0.1)
-    parser.add_argument("--epochs", type=int, default=100)
+    parser.add_argument("--epochs", type=int, default=500)
     return parser.parse_args()
 
 def create_train_val_loaders(datadir, val_split, batch_size):
@@ -94,7 +94,7 @@ def create_train_val_loaders(datadir, val_split, batch_size):
     val_loader = DataLoader(val_set, batch_size=batch_size, shuffle=False)
     return train_loader, val_loader
 
-def create_summary_writers(model, device, log_dir):
+def create_summary_writers(log_dir):
     train_path = log_dir / "train"
     val_path = log_dir / "validation"
     train_writer = tensorboard.SummaryWriter(train_path, flush_secs=60)

@@ -17,26 +17,25 @@ class SegDataset(Dataset):
 
     def __getitem__(self,idx):
         img_path = os.path.join(self.img_dir, self.imgs[idx])
-        ann_path = os.path.join(self.ann_dir, self.imgs[idx].replace('.png', '.json').replace('.jpg', '.json'))
+        mask_path = os.path.join(self.ann_dir, self.imgs[idx].replace('.png', '.json').replace('.jpg', '.json'))
 
-        img = cv2.imread(img_path).astype(np.float32)
-        if img is None:
-            raise FileNotFoundError(f"Image not found: {img_path}")
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        
-        shape_dicts = get_poly(ann_path) 
-        mask = create_multi_masks(img,shape_dicts)
+        img = get_image(img_path)
+        mask = get_mask(img, mask_path)
 
-        img = np.transpose(img, (2, 0, 1))
         return img, mask
     
-def get_poly(ann_path):
-    with open(ann_path) as handle:
-        data = json.load(handle)
-    return data['shapes']
+def get_image(img_path):
+    img = cv2.imread(img_path).astype(np.float32)
+    if img is None:
+        raise FileNotFoundError(f"Image not found: {img_path}")
+    return np.transpose(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), (2, 0, 1))
+     
 
-def create_multi_masks(im, shape_dicts):
-    height, width, _ = im.shape
+def get_mask(img, mask_path):
+    with open(mask_path) as handle:
+        data = json.load(handle)
+    shape_dicts = data["shapes"]
+
     channels = []
 
     # class in mask
@@ -49,6 +48,7 @@ def create_multi_masks(im, shape_dicts):
     label2poly = dict(zip(cls, poly))
 
     # define background
+    _, height, width = img.shape
     background = np.zeros(shape=(height, width), dtype=np.float32)
 
     for label in LABELS:

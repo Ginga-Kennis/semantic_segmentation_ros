@@ -5,8 +5,8 @@ from pathlib import Path
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 
-from segsfs.dataset import SegDataset  # Your dataset class
-from segsfs.networks import load_network  # Your function to load the network
+from semantic_segmentation_ros.dataset import SegDataset  # Your dataset class
+from semantic_segmentation_ros.networks import load_network  # Your function to load the network
 
 def visualize_segmentation(true_mask, predicted_mask):
     """
@@ -42,7 +42,7 @@ def evaluate_and_visualize(model, data_loader, device, num_images=5):
 
     with torch.no_grad():
         for i, (images, true_masks) in enumerate(data_loader):
-            if i >= images_to_show: break
+            # if i >= images_to_show: break
             
             images = images.to(device).float()
             true_masks = true_masks.to(device)
