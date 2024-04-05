@@ -30,3 +30,14 @@ Build and source the catkin workspace,
 catkin build vgn
 source /path/to/catkin_ws/devel/setup.zsh
 ```
+
+## Network Training
+```
+python3 scripts/train.py [--datadir] [--logdir] [--model] [--batch-size] [--val-split] [--lr] [--epochs]
+```
+
+Training and validation metrics are logged to TensorBoard and can be accessed with
+
+```
+tensorboard --logdir=log/training
+```

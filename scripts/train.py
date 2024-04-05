@@ -46,7 +46,7 @@ def main():
 
     # Log training progress to the terminal and tensorboard
     ProgressBar(persist=False).attach(trainer)
-    train_writer, val_writer = create_summary_writers(model, device, logdir)
+    train_writer, val_writer = create_summary_writers(logdir)
 
     @trainer.on(Events.EPOCH_COMPLETED)
     def log_train_results(engine):
