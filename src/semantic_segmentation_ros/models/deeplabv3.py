@@ -1,12 +1,11 @@
-import torch
 import torch.nn as nn
-from torchvision.models.segmentation import deeplabv3
+
+from torchvision.models.segmentation import deeplabv3_resnet101
 
 class DeeplabV3(nn.Module):
     def __init__(self,out_channels):
         super().__init__()
-        self.model = deeplabv3.deeplabv3_resnet101(pretrained=True)
-        self.model.classifier = deeplabv3.DeepLabHead(2048, out_channels)
+        self.model = deeplabv3_resnet101(weights=None, num_classes=5)
 
     def forward(self,x):
         return self.model(x)["out"]

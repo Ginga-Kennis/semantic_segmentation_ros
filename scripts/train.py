@@ -8,10 +8,10 @@ from torch.utils.data import DataLoader
 from torch.utils import tensorboard
 
 from ignite.engine import Engine, Events, create_supervised_trainer, create_supervised_evaluator
-from ignite.contrib.handlers.tqdm_logger import ProgressBar
+from ignite.handlers.tqdm_logger import ProgressBar
 from ignite.metrics import Loss
 from ignite.handlers import Checkpoint
-from ignite.contrib.handlers.tensorboard_logger import *
+from ignite.handlers.tensorboard_logger import *
 
 from semantic_segmentation_ros.dataset import SegDataset
 from semantic_segmentation_ros.networks import get_model
