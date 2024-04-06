@@ -1,10 +1,12 @@
 import torch
 
 from semantic_segmentation_ros.models.unet import Unet
+from semantic_segmentation_ros.models.deeplabv3 import DeeplabV3
 
 def get_model(name):
     models = {
         "unet": Unet(3,5),
+        "deeplabv3" : DeeplabV3(5)
     }
     return models[name.lower()]
 
