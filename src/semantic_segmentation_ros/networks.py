@@ -11,7 +11,7 @@ def get_model(name):
     return models[name.lower()]
 
 def load_network(path, device):
-    model_name = "deeplabv3"
+    model_name = "unet"
     net = get_model(model_name).to(device)
     net.load_state_dict(torch.load(path, map_location=device))
     return net
