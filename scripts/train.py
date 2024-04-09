@@ -14,6 +14,7 @@ from ignite.handlers import Checkpoint
 from ignite.handlers.tensorboard_logger import *
 
 from semantic_segmentation_ros.dataset import SegDataset
+from semantic_segmentation_ros.metrics import MeanIoU
 from semantic_segmentation_ros.networks import get_model
 
 def main():
@@ -39,7 +40,8 @@ def main():
     trainer = create_supervised_trainer(model, optimizer, criterion, device)
 
     metrics = {
-        "loss": Loss(criterion)
+        "loss": Loss(criterion),
+        "mIOU": MeanIoU(num_classes=5, device=device)
     }
     train_evaluator = create_supervised_evaluator(model, metrics=metrics, device=device)
     val_evaluator = create_supervised_evaluator(model, metrics=metrics, device=device)
@@ -53,12 +55,14 @@ def main():
         train_evaluator.run(train_loader)
         epoch, metrics = trainer.state.epoch, train_evaluator.state.metrics
         train_writer.add_scalar("loss", metrics["loss"], epoch)
+        train_writer.add_scalar("mIOU", metrics["mIOU"], epoch)
 
     @trainer.on(Events.EPOCH_COMPLETED)
     def log_validation_results(engine):
         val_evaluator.run(val_loader)
         epoch, metrics = trainer.state.epoch, val_evaluator.state.metrics
         val_writer.add_scalar("loss", metrics["loss"], epoch)
+        val_writer.add_scalar("mIOU", metrics["mIOU"], epoch)
 
 
     # Checkpoint model
@@ -74,12 +78,16 @@ def main():
     # run training
     trainer.run(train_loader, max_epochs=args.epochs)
 
+def preprocess_function(engine, batch):
+    print(batch)
+    return y_pred, y
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--datadir", type=Path, default="data")
     parser.add_argument("--logdir", type=Path, default="log/training")
     parser.add_argument("--model", type=str, default="unet")
-    parser.add_argument("--batch-size", type=int, default=15)
+    parser.add_argument("--batch-size", type=int, default=10)
     parser.add_argument("--val-split", type=float, default=0.1)
     parser.add_argument("--lr", type=float, default=0.1)
     parser.add_argument("--epochs", type=int, default=500)

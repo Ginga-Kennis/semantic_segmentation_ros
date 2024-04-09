@@ -5,4 +5,5 @@ matplotlib
 tensorboard
 tqdm
 torch
+torchvision
 imgaug

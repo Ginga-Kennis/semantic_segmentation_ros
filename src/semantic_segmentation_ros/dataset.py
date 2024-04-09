@@ -56,11 +56,11 @@ def get_mask(img, mask_path):
         blank = np.zeros(shape=(height, width), dtype=np.float32)
         
         if label in cls:
-            cv2.fillPoly(blank, [label2poly[label]], 255)
+            cv2.fillPoly(blank, [label2poly[label]], 1)
             cv2.fillPoly(background, [label2poly[label]], 255)
             
         channels.append(blank)
-    _, thresh = cv2.threshold(background, 127, 255, cv2.THRESH_BINARY_INV)
+    _, thresh = cv2.threshold(background, 127, 1, cv2.THRESH_BINARY_INV)
     channels.append(thresh)
 
     Y = np.stack(channels, axis=0)
