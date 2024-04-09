@@ -3,6 +3,7 @@ numpy
 pytorch-ignite
 matplotlib
 tensorboard
+pyyaml
 tqdm
 torch
 torchvision

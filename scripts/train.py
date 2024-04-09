@@ -78,9 +78,6 @@ def main():
     # run training
     trainer.run(train_loader, max_epochs=args.epochs)
 
-def preprocess_function(engine, batch):
-    print(batch)
-    return y_pred, y
 
 def parse_args():
     parser = argparse.ArgumentParser()

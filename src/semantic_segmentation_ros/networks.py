@@ -11,13 +11,13 @@ def get_model(name):
     return models[name.lower()]
 
 def load_network(path, device):
-    model_name = "unet"
+    model_name = "deeplabv3"
     net = get_model(model_name).to(device)
     net.load_state_dict(torch.load(path, map_location=device))
     return net
 
 def load_model(path, device):
-    model_name = path.stem.split("_")[1]
+    model_name = path.stem.split("_")[0]
     net = get_model(model_name).to(device)
     net.load_state_dict(torch.load(path, map_location=device))
     return net

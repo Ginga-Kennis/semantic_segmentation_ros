@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<launch>
+  <!-- Load configuration -->
+  <rosparam command="load" file="$(find semantic_segmentation_ros)/config/realsense_d415.yaml" subst_value="true" />
+
+  <!-- Launch Nodes -->
+  <node pkg="semantic_segmentation_ros" type="semantic_segmentation_server.py" name="semantic_segmentation_server" output="screen" />
+</launch>

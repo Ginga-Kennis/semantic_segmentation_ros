@@ -1,0 +1,2 @@
+semantic_segmentation_server:
+  model_path: $(find semantic_segmentation_ros)/assets/models/deeplabv3_292.pt
