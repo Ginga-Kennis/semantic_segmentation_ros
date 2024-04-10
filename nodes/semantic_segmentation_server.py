@@ -23,6 +23,7 @@ class SemanticSegmentationServer:
         rospy.loginfo(self.model_path)
 
     def init_topics(self):
+        self.segmentation_pub = rospy.Publisher("segmentation_image", Image, queue_size=10)
         rospy.Subscriber(self.color_topic, Image, self.sensor_cb)
 
     def init_semantic_segmentation_server(self):
@@ -31,7 +32,18 @@ class SemanticSegmentationServer:
     def sensor_cb(self, msg):
         img = self.cv_bridge.imgmsg_to_cv2(msg).astype(np.float32)
         y_pred = self.ss_server.predict(img)
-        print(y_pred.shape)
+        seg_img = self.pred_to_color(y_pred)
+        # カラーのセグメンテーションマップをROSメッセージに変換して配信
+        seg_msg = self.cv_bridge.cv2_to_imgmsg(seg_img, "bgr8")
+        self.segmentation_pub.publish(seg_msg)
+
+    def pred_to_color(self, y_pred):
+        class_indices = np.argmax(y_pred, axis=0)
+        colors = np.array([[255, 0, 0], [0, 255, 0], [0, 0, 255], [255, 255, 0], [0, 255, 255]])
+        seg_img = np.zeros((class_indices.shape[0], class_indices.shape[1], 3), dtype=np.uint8)
+        for class_id in range(y_pred.shape[0]):
+            seg_img[class_indices == class_id] = colors[class_id % len(colors)]
+        return seg_img
 
 
 
