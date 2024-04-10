@@ -1,3 +1,3 @@
 semantic_segmentation_server:
-  camera : /camera/color/image_raw
+  color_topic : /camera/color/image_raw
   model_path: $(find semantic_segmentation_ros)/assets/models/deeplabv3_292.pt

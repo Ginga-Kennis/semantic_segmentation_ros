@@ -3,6 +3,17 @@
   <!-- Load configuration -->
   <rosparam command="load" file="$(find semantic_segmentation_ros)/config/realsense_d415.yaml" subst_value="true" />
 
+    <!-- Launch camera driver -->
+  <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+    <arg name="align_depth" value="true" />
+    <arg name="depth_width" value="640" />
+    <arg name="depth_height" value="480" />
+    <arg name="depth_fps" value="6" />
+    <arg name="color_width" value="640" />
+    <arg name="color_height" value="480" />
+    <arg name="color_fps" value="6" />
+  </include>
+
   <!-- Launch Nodes -->
   <node pkg="semantic_segmentation_ros" type="semantic_segmentation_server.py" name="semantic_segmentation_server" output="screen" />
 </launch>
