@@ -81,7 +81,7 @@ def main():
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--datadir", type=Path, default="data")
+    parser.add_argument("--datadir", type=Path, default="assets/data")
     parser.add_argument("--logdir", type=Path, default="log/training")
     parser.add_argument("--model", type=str, default="unet")
     parser.add_argument("--batch-size", type=int, default=10)
