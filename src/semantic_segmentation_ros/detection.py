@@ -1,5 +1,4 @@
 import torch
-import numpy as np
 from semantic_segmentation_ros.networks import load_model
 
 class SemanticSegmentation:

@@ -1,7 +1,6 @@
 import torch
 from ignite.metrics import Metric
 from ignite.exceptions import NotComputableError
-from ignite.metrics.metric import sync_all_reduce, reinit__is_reduced
 
 class MeanIoU(Metric):
     def __init__(self, num_classes, output_transform=lambda x: x, device="cpu"):

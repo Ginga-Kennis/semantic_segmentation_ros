@@ -9,10 +9,10 @@ unet = smp.Unet(
 )
 
 unetplusplus = smp.UnetPlusPlus(
-    encoder_name="resnet34",        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
-    encoder_weights="imagenet",     # use `imagenet` pre-trained weights for encoder initialization
-    in_channels=3,                  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
-    classes=5,                      # model output channels (number of classes in your dataset)
+    encoder_name="resnet34",        
+    encoder_weights="imagenet",     
+    in_channels=3,                  
+    classes=5,                      
 )
 
 deeplabv3 = smp.DeepLabV3(

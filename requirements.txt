@@ -6,5 +6,5 @@ tensorboard
 pyyaml
 tqdm
 torch
-torchvision
 imgaug
+segmentation-models-pytorch

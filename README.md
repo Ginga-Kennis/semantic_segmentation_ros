@@ -42,3 +42,9 @@ Training and validation metrics are logged to TensorBoard and can be accessed wi
 ```
 tensorboard --logdir=log/training
 ```
+
+## RealSense inference
+This package contains an example of realtime semantic segmentation with Intel Realsense D435.
+```
+roslaunch semantic_segmentation_ros realsense_semantic_segmentation.launch
+```
