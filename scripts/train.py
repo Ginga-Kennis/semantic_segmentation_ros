@@ -10,7 +10,7 @@ from torch.utils import tensorboard
 from ignite.engine import Engine, Events, create_supervised_trainer, create_supervised_evaluator
 from ignite.handlers.tqdm_logger import ProgressBar
 from ignite.metrics import Loss
-from ignite.handlers import Checkpoint
+from ignite.handlers import Checkpoint, ModelCheckpoint, global_step_from_engine
 from ignite.handlers.tensorboard_logger import *
 
 from semantic_segmentation_ros.dataset import SegDataset
@@ -64,16 +64,18 @@ def main():
         val_writer.add_scalar("loss", metrics["loss"], epoch)
         val_writer.add_scalar("mIOU", metrics["mIOU"], epoch)
 
-
-    # Checkpoint model
-    checkpoint_handler = Checkpoint(
-        {args.model: model},
-        str(logdir),
-        "",
-        n_saved=100,
-        global_step_transform=lambda *_: trainer.state.epoch,
+    # Checkpoint best model
+    model_checkpoint = ModelCheckpoint(
+        dirname=str(logdir),
+        # filename_prefix="best",
+        score_function=lambda engine: engine.state.metrics['mIOU'],
+        score_name="mIOU",
+        n_saved=1,
+        create_dir=True,
+        global_step_transform=global_step_from_engine(trainer), # エポック数をファイル名に使用
     )
-    trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoint_handler)
+    # 検証ステップが終了するたびにモデルをチェックポイント
+    val_evaluator.add_event_handler(Events.COMPLETED, model_checkpoint, {args.model: model})
 
     # run training
     trainer.run(train_loader, max_epochs=args.epochs)
@@ -86,8 +88,8 @@ def parse_args():
     parser.add_argument("--model", type=str, default="unet")
     parser.add_argument("--batch-size", type=int, default=20)
     parser.add_argument("--val-split", type=float, default=0.1)
-    parser.add_argument("--lr", type=float, default=0.1)
-    parser.add_argument("--epochs", type=int, default=500)
+    parser.add_argument("--lr", type=float, default=0.01)
+    parser.add_argument("--epochs", type=int, default=1000)
     return parser.parse_args()
 
 def create_train_val_loaders(datadir, val_split, batch_size):
