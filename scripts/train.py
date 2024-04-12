@@ -23,7 +23,7 @@ def main():
 
     # Log directory
     time_stamp = datetime.now().strftime("%m%d%H%M")
-    description = f"{time_stamp},batch_size={args.batch_size},lr={args.lr}"
+    description = f"{time_stamp},model={args.model},batch_size={args.batch_size},lr={args.lr}"
     logdir = args.logdir / description 
 
     # Build the network
@@ -84,7 +84,7 @@ def parse_args():
     parser.add_argument("--datadir", type=Path, default="assets/data")
     parser.add_argument("--logdir", type=Path, default="log/training")
     parser.add_argument("--model", type=str, default="unet")
-    parser.add_argument("--batch-size", type=int, default=10)
+    parser.add_argument("--batch-size", type=int, default=20)
     parser.add_argument("--val-split", type=float, default=0.1)
     parser.add_argument("--lr", type=float, default=0.1)
     parser.add_argument("--epochs", type=int, default=500)
