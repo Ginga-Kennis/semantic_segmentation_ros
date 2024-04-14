@@ -24,17 +24,21 @@ def main(config):
 
     # Log directory
     time_stamp = datetime.now().strftime("%m%d%H%M")
-    description = f'{time_stamp},model={config["model"]},batch_size={config["batch_size"]},lr={config["lr"]}'
-    logdir = Path(config["logdir"]) / description 
+    description = f'{time_stamp},model={config["arch"]["model"]},batch_size={config["train"]["batch_size"]},lr={config["train"]["lr"]}'
+    logdir = Path(config["path"]["log"]) / description 
 
     # Build the network
-    model = get_model(name=config["model"]).to(device)
+    model = get_model(model_name = config["arch"]["model"], 
+                      encoder_name = config["arch"]["encoder_name"], 
+                      encoder_weights = config["arch"]["encoder_weights"],
+                      in_channels = config["arch"]["in_channels"],
+                      classes = config["arch"]["classes"]).to(device)
 
     # Create data loaders
-    train_loader, val_loader = create_train_val_loaders(config["datadir"], config["val_split"], config["batch_size"], kwargs)
+    train_loader, val_loader = create_train_val_loaders(config["path"]["data"], config["train"]["val_split"], config["train"]["batch_size"], kwargs)
 
     # Define optimizer and criterion(loss)
-    optimizer = torch.optim.Adam(model.parameters(), lr=config["lr"])
+    optimizer = torch.optim.Adam(model.parameters(), lr=config["train"]["lr"])
     criterion = nn.CrossEntropyLoss()
 
     # Create ignite engines for training and validation
@@ -75,10 +79,10 @@ def main(config):
         create_dir=True,
         global_step_transform=global_step_from_engine(trainer), 
     )
-    val_evaluator.add_event_handler(Events.COMPLETED, model_checkpoint, {config["model"]: model})
+    val_evaluator.add_event_handler(Events.COMPLETED, model_checkpoint, {config["arch"]["model"]: model})
 
     # run training
-    trainer.run(train_loader, max_epochs=config["epochs"])
+    trainer.run(train_loader, max_epochs=config["train"]["epochs"])
 
 
 def parse_args():

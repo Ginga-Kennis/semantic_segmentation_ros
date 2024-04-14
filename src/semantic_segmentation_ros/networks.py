@@ -29,14 +29,41 @@ deeplabv3plus = smp.DeepLabV3Plus(
     classes=5,                      
 )
 
-def get_model(name):
-    models = {
-        "unet": unet,
-        "unetplusplus" : unetplusplus,
-        "deeplabv3" : deeplabv3,
-        "deeplabv3plus" : deeplabv3plus
-    }
-    return models[name.lower()]
+def create_model(model_name, encoder_name="resnet34", encoder_weights="imagenet", in_channels=3, classes=5):
+    if model_name == "unet":
+        model = smp.Unet(
+            encoder_name=encoder_name,
+            encoder_weights=encoder_weights,
+            in_channels=in_channels,
+            classes=classes,
+        )
+    elif model_name == "unetplusplus":
+        model = smp.UnetPlusPlus(
+            encoder_name=encoder_name,
+            encoder_weights=encoder_weights,
+            in_channels=in_channels,
+            classes=classes,
+        )
+    elif model_name == "deeplabv3":
+        model = smp.DeepLabV3(
+            encoder_name=encoder_name,
+            encoder_weights=encoder_weights,
+            in_channels=in_channels,
+            classes=classes,
+        )
+    elif model_name == "deeplabv3plus":
+        model = smp.DeepLabV3Plus(
+            encoder_name=encoder_name,
+            encoder_weights=encoder_weights,
+            in_channels=in_channels,
+            classes=classes,
+        )
+    else:
+        raise ValueError(f"Unknown model type: {model_name}")
+    return model
+
+def get_model(model_name, encoder_name="resnet34", encoder_weights="imagenet", in_channels=3, classes=5):
+    return create_model(model_name, encoder_name=encoder_name, encoder_weights=encoder_weights, in_channels=in_channels, classes=classes)
 
 def load_model(path, device):
     model_name = path.stem.split("_")[0]

@@ -1,11 +1,24 @@
 {
-    "datadir": "assets/data",
-    "logdir": "log/training",
-    "model": "deeplabv3plus",
-    "batch_size": 20,
-    "val_split": 0.1,
-    "lr": 0.01,
-    "epochs": 5000,
-    "num_workers" : 8,
-    "pin_memory" : true
+    "num_workers": 8,
+    "pin_memory": true,
+
+    "arch" : {
+        "model" : "deeplabv3plus",
+        "encoder_name" : "resnet34",
+        "encoder_weights" : "imagenet",
+        "in_channels" : 3,
+        "classes" : 5
+    },
+
+    "path" : {
+        "data" : "assets/data",
+        "log" : "log/training"
+    },
+
+    "train" : {
+        "batch_size": 20,
+        "val_split": 0.1,
+        "lr": 0.00005,
+        "epochs": 5000
+    }
 }
