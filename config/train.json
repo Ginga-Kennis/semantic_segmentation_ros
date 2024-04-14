@@ -1,0 +1,11 @@
+{
+    "datadir": "assets/data",
+    "logdir": "log/training",
+    "model": "deeplabv3plus",
+    "batch_size": 20,
+    "val_split": 0.1,
+    "lr": 0.01,
+    "epochs": 5000,
+    "num_workers" : 8,
+    "pin_memory" : true
+}

@@ -1,3 +1,4 @@
 semantic_segmentation_server:
   color_topic : /camera/color/image_raw
-  model_path: $(find semantic_segmentation_ros)/assets/model/deeplabv3plus_83_mIOU=0.5277.pt
+  model_path: $(find semantic_segmentation_ros)/assets/model/deeplabv3plus_86_mIOU=0.5524.pt
+  
