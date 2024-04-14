@@ -28,8 +28,8 @@ pip install -r requirements.txt
 Build and source the catkin workspace,
 
 ```
-catkin build vgn
-source /path/to/catkin_ws/devel/setup.zsh
+catkin build semantic_segmentation_ros
+source /path/to/catkin_ws/devel/setup.bash
 ```
 
 ## Network Training
