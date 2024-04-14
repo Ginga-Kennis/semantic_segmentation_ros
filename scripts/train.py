@@ -7,10 +7,10 @@ from torch import nn
 from torch.utils.data import DataLoader
 from torch.utils import tensorboard
 
-from ignite.engine import Engine, Events, create_supervised_trainer, create_supervised_evaluator
+from ignite.engine import Events, create_supervised_trainer, create_supervised_evaluator
 from ignite.handlers.tqdm_logger import ProgressBar
 from ignite.metrics import Loss
-from ignite.handlers import Checkpoint, ModelCheckpoint, global_step_from_engine
+from ignite.handlers import ModelCheckpoint, global_step_from_engine
 from ignite.handlers.tensorboard_logger import *
 
 from semantic_segmentation_ros.dataset import SegDataset
@@ -93,7 +93,7 @@ def parse_args():
     return parser.parse_args()
 
 def create_train_val_loaders(datadir, val_split, batch_size):
-    dataset = SegDataset(datadir)
+    dataset = SegDataset(datadir, augment=True)
     val_size = int(val_split * len(dataset))
     train_size = len(dataset) - val_size
     train_set, val_set = torch.utils.data.random_split(dataset, [train_size, val_size])

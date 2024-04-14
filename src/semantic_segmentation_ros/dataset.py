@@ -2,15 +2,26 @@ import os
 import cv2
 import json
 import numpy as np
+import imgaug as ia
+import imgaug.augmenters as iaa
 from torch.utils.data import Dataset
-
+import matplotlib.pyplot as plt
 LABELS = ['circle', 'square', 'star', 'triangle']
 
 class SegDataset(Dataset):
-    def __init__(self, dir):
+    def __init__(self, dir, augment=False):
         self.img_dir = os.path.join(dir, "img")
         self.ann_dir = os.path.join(dir, "ann")
         self.imgs = list(sorted(os.listdir(self.img_dir)))
+
+        self.augment = augment
+        if self.augment:
+            self.seq = iaa.Sequential([
+                iaa.Fliplr(0.5),  # Horizontal flips
+                iaa.Multiply((1.2, 1.5)),  # Change brightness
+                iaa.Affine(rotate=(-90, 90)),  # Rotate
+                iaa.Sometimes(0.5, iaa.GaussianBlur(sigma=(0, 10)))  # Apply Gaussian blur
+            ], random_order=True)
 
     def __len__(self):
         return len(self.imgs)
@@ -22,7 +33,19 @@ class SegDataset(Dataset):
         img = get_image(img_path)
         mask = get_mask(img, mask_path)
 
+        if self.augment:
+            img, mask = apply_augment(img, mask, self.seq)
+
         return img, mask
+    
+def apply_augment(img, mask, seq):
+    ia.seed(1)
+    seq_det = seq.to_deterministic()  
+    img_aug = np.transpose(img, (1, 2, 0))  # Convert (channel, height, width) to (height, width, channel) 
+    img_aug = seq_det.augment_image(img_aug)
+    mask_aug = np.array([seq_det.augment_image(channel) for channel in mask])
+    img_aug = np.transpose(img_aug, (2, 0, 1))  # Convert (height, width, channel) to (channel, height, width) 
+    return img_aug, mask_aug
     
 def get_image(img_path):
     img = cv2.imread(img_path).astype(np.float32)
