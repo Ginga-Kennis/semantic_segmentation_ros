@@ -18,24 +18,23 @@ from semantic_segmentation_ros.dataset import SegDataset
 from semantic_segmentation_ros.metrics import MeanIoU
 from semantic_segmentation_ros.networks import get_model
 
-def main():
-    args = parse_args()
+def main(config):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    kwargs = {"num_workers": args.num_workers, "pin_memory": args.pin_memory} if torch.cuda.is_available() else {}
+    kwargs = {"num_workers": config["num_workers"], "pin_memory": config["pin_memory"]} if torch.cuda.is_available() else {}
 
     # Log directory
     time_stamp = datetime.now().strftime("%m%d%H%M")
-    description = f"{time_stamp},model={args.model},batch_size={args.batch_size},lr={args.lr}"
-    logdir = args.logdir / description 
+    description = f'{time_stamp},model={config["model"]},batch_size={config["batch_size"]},lr={config["lr"]}'
+    logdir = Path(config["logdir"]) / description 
 
     # Build the network
-    model = get_model(name=args.model).to(device)
+    model = get_model(name=config["model"]).to(device)
 
     # Create data loaders
-    train_loader, val_loader = create_train_val_loaders(args.datadir, args.val_split, args.batch_size, kwargs)
+    train_loader, val_loader = create_train_val_loaders(config["datadir"], config["val_split"], config["batch_size"], kwargs)
 
     # Define optimizer and criterion(loss)
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+    optimizer = torch.optim.Adam(model.parameters(), lr=config["lr"])
     criterion = nn.CrossEntropyLoss()
 
     # Create ignite engines for training and validation
@@ -76,27 +75,20 @@ def main():
         create_dir=True,
         global_step_transform=global_step_from_engine(trainer), 
     )
-    val_evaluator.add_event_handler(Events.COMPLETED, model_checkpoint, {args.model: model})
+    val_evaluator.add_event_handler(Events.COMPLETED, model_checkpoint, {config["model"]: model})
 
     # run training
-    trainer.run(train_loader, max_epochs=args.epochs)
+    trainer.run(train_loader, max_epochs=config["epochs"])
 
 
 def parse_args():
-    with open('config/train.json', 'r') as config_file:
-        config = json.load(config_file)
-    
     parser = argparse.ArgumentParser()
-    parser.add_argument("--datadir", type=Path, default=config.get('datadir', "assets/data"))
-    parser.add_argument("--logdir", type=Path, default=config.get('logdir', "log/training"))
-    parser.add_argument("--model", type=str, default=config.get('model', "unet"))
-    parser.add_argument("--batch-size", type=int, default=config.get('batch_size', 20))
-    parser.add_argument("--val-split", type=float, default=config.get('val_split', 0.1))
-    parser.add_argument("--lr", type=float, default=config.get('lr', 0.01))
-    parser.add_argument("--epochs", type=int, default=config.get('epochs', 1000))
-    parser.add_argument("--num-workers", type=int, default=config.get('num_workers', 4))
-    parser.add_argument("--pin-memory", type=bool, default=config.get('pin_memory', True))
-    return parser.parse_args()
+    parser.add_argument("--config", type=str, default='config/train.json', help="Path to config JSON file")
+    args = parser.parse_args()
+    
+    with open(args.config, 'r') as config_file:
+        config = json.load(config_file)
+    return config
 
 def create_train_val_loaders(datadir, val_split, batch_size, kwargs):
     dataset = SegDataset(datadir, augment=True)
@@ -115,4 +107,5 @@ def create_summary_writers(log_dir):
     return train_writer, val_writer
 
 if __name__ == "__main__":
-    main()
+    config = parse_args()
+    main(config)
