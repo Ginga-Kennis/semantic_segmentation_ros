@@ -5,22 +5,26 @@ import numpy as np
 import imgaug as ia
 import imgaug.augmenters as iaa
 from torch.utils.data import Dataset
-import matplotlib.pyplot as plt
-LABELS = ['circle', 'square', 'star', 'triangle']
 
 class SegDataset(Dataset):
-    def __init__(self, dir, augment=False):
+    def __init__(self, dir, labels, augmentations):
+        self.labels = labels
         self.img_dir = os.path.join(dir, "img")
         self.ann_dir = os.path.join(dir, "ann")
         self.imgs = list(sorted(os.listdir(self.img_dir)))
 
-        self.augment = augment
-        if self.augment:
+        self.augmentations = augmentations
+
+        if self.augmentations['enabled']:
             self.seq = iaa.Sequential([
-                iaa.Fliplr(0.5),  # Horizontal flips
-                iaa.Multiply((1.2, 1.5)),  # Change brightness
-                iaa.Affine(rotate=(-90, 90)),  # Rotate
-                iaa.Sometimes(0.5, iaa.GaussianBlur(sigma=(0, 10)))  # Apply Gaussian blur
+                iaa.Fliplr(self.augmentations['flip_lr']),  # Horizontal flips
+                iaa.Flipud(self.augmentations['flip_ud']),  # Vertical flips
+                iaa.Multiply(self.augmentations['brightness_multiply']),  # Change brightness
+                iaa.Affine(rotate=self.augmentations['rotate']),  # Rotate
+                iaa.Sometimes(
+                    self.augmentations['apply_prob'],
+                    iaa.GaussianBlur(sigma=self.augmentations['sigma'])
+                )  # Apply Gaussian blur
             ], random_order=True)
 
     def __len__(self):
@@ -31,9 +35,9 @@ class SegDataset(Dataset):
         mask_path = os.path.join(self.ann_dir, self.imgs[idx].replace('.png', '.json').replace('.jpg', '.json'))
 
         img = get_image(img_path)
-        mask = get_mask(img, mask_path)
+        mask = get_mask(img, mask_path, self.labels)
 
-        if self.augment:
+        if self.augmentations['enabled']:
             img, mask = apply_augment(img, mask, self.seq)
 
         return img, mask
@@ -54,7 +58,7 @@ def get_image(img_path):
     return np.transpose(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), (2, 0, 1))
      
 
-def get_mask(img, mask_path):
+def get_mask(img, mask_path, labels):
     with open(mask_path) as handle:
         data = json.load(handle)
     shape_dicts = data["shapes"]
@@ -74,7 +78,7 @@ def get_mask(img, mask_path):
     _, height, width = img.shape
     background = np.zeros(shape=(height, width), dtype=np.float32)
 
-    for label in LABELS:
+    for label in labels:
         
         blank = np.zeros(shape=(height, width), dtype=np.float32)
         

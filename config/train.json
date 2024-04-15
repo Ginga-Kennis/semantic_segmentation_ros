@@ -2,17 +2,32 @@
     "num_workers": 8,
     "pin_memory": true,
 
+    "path" : {
+        "data" : "assets/data",
+        "log" : "log/training"
+    },
+
+    "dataset" : {
+        "labels" : ["circle", "square", "star", "triangle"],
+        "augmentations": {
+            "enabled": true,
+            "flip_ud": 0.5,
+            "flip_lr": 0.5,
+            "brightness_multiply": [1.2, 1.5],
+            "rotate": [-90, 90],
+            "gaussian_blur": {
+                "apply_prob": 0.5,
+                "sigma": [0, 10]
+            }
+        }
+    },
+
     "arch" : {
         "model" : "deeplabv3plus",
         "encoder_name" : "resnet34",
         "encoder_weights" : "imagenet",
         "in_channels" : 3,
         "classes" : 5
-    },
-
-    "path" : {
-        "data" : "assets/data",
-        "log" : "log/training"
     },
 
     "train" : {

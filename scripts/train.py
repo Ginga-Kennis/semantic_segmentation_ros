@@ -27,6 +27,7 @@ def main(config):
     description = f'{time_stamp},model={config["arch"]["model"]},batch_size={config["train"]["batch_size"]},lr={config["train"]["lr"]}'
     logdir = Path(config["path"]["log"]) / description 
 
+    print(config["arch"])
     # Build the network
     model = get_model(model_name = config["arch"]["model"], 
                       encoder_name = config["arch"]["encoder_name"], 
@@ -35,7 +36,20 @@ def main(config):
                       classes = config["arch"]["classes"]).to(device)
 
     # Create data loaders
-    train_loader, val_loader = create_train_val_loaders(config["path"]["data"], config["train"]["val_split"], config["train"]["batch_size"], kwargs)
+    augkwargs = {"enabled" : config["dataset"]["augmentations"]["enabled"],
+                 "flip_ud" : config["dataset"]["augmentations"]["flip_ud"], 
+                 "flip_lr" : config["dataset"]["augmentations"]["flip_lr"],
+                 "brightness_multiply" : config["dataset"]["augmentations"]["brightness_multiply"],
+                 "rotate" : config["dataset"]["augmentations"]["rotate"],
+                 "apply_prob" : config["dataset"]["augmentations"]["gaussian_blur"]["apply_prob"],
+                 "sigma" : config["dataset"]["augmentations"]["gaussian_blur"]["sigma"]}
+    
+    train_loader, val_loader = create_train_val_loaders(config["path"]["data"], 
+                                                        config["dataset"]["labels"], 
+                                                        config["train"]["val_split"], 
+                                                        config["train"]["batch_size"], 
+                                                        kwargs, 
+                                                        augkwargs)
 
     # Define optimizer and criterion(loss)
     optimizer = torch.optim.Adam(model.parameters(), lr=config["train"]["lr"])
@@ -94,8 +108,8 @@ def parse_args():
         config = json.load(config_file)
     return config
 
-def create_train_val_loaders(datadir, val_split, batch_size, kwargs):
-    dataset = SegDataset(datadir, augment=True)
+def create_train_val_loaders(datadir, labels, val_split, batch_size, kwargs, augkwargs):
+    dataset = SegDataset(datadir, labels, augkwargs)
     val_size = int(val_split * len(dataset))
     train_size = len(dataset) - val_size
     train_set, val_set = torch.utils.data.random_split(dataset, [train_size, val_size])
