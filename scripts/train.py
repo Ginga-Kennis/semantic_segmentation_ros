@@ -20,36 +20,16 @@ from semantic_segmentation_ros.networks import get_model
 
 def main(config):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    kwargs = {"num_workers": config["num_workers"], "pin_memory": config["pin_memory"]} if torch.cuda.is_available() else {}
 
     # Log directory
     time_stamp = datetime.now().strftime("%m%d%H%M")
-    description = f'{time_stamp},model={config["arch"]["model"]},batch_size={config["train"]["batch_size"]},lr={config["train"]["lr"]}'
-    logdir = Path(config["path"]["log"]) / description 
+    description = f'{time_stamp}, {config["arch"]["model"]}, {config["dataloader"]["batch_size"]}, {config["train"]["lr"]}'
+    logdir = Path(config["log"]["path"]) / description 
 
-    print(config["arch"])
     # Build the network
-    model = get_model(model_name = config["arch"]["model"], 
-                      encoder_name = config["arch"]["encoder_name"], 
-                      encoder_weights = config["arch"]["encoder_weights"],
-                      in_channels = config["arch"]["in_channels"],
-                      classes = config["arch"]["classes"]).to(device)
+    model = get_model(**config["arch"]).to(device)
 
-    # Create data loaders
-    augkwargs = {"enabled" : config["dataset"]["augmentations"]["enabled"],
-                 "flip_ud" : config["dataset"]["augmentations"]["flip_ud"], 
-                 "flip_lr" : config["dataset"]["augmentations"]["flip_lr"],
-                 "brightness_multiply" : config["dataset"]["augmentations"]["brightness_multiply"],
-                 "rotate" : config["dataset"]["augmentations"]["rotate"],
-                 "apply_prob" : config["dataset"]["augmentations"]["gaussian_blur"]["apply_prob"],
-                 "sigma" : config["dataset"]["augmentations"]["gaussian_blur"]["sigma"]}
-    
-    train_loader, val_loader = create_train_val_loaders(config["path"]["data"], 
-                                                        config["dataset"]["labels"], 
-                                                        config["train"]["val_split"], 
-                                                        config["train"]["batch_size"], 
-                                                        kwargs, 
-                                                        augkwargs)
+    train_loader, val_loader = create_train_val_loaders(**config["dataset"], **config["dataloader"])
 
     # Define optimizer and criterion(loss)
     optimizer = torch.optim.Adam(model.parameters(), lr=config["train"]["lr"])
@@ -108,13 +88,13 @@ def parse_args():
         config = json.load(config_file)
     return config
 
-def create_train_val_loaders(datadir, labels, val_split, batch_size, kwargs, augkwargs):
-    dataset = SegDataset(datadir, labels, augkwargs)
+def create_train_val_loaders(path, labels, val_split, augmentations, batch_size, num_workers, pin_memory):
+    dataset = SegDataset(path, labels, augmentations)
     val_size = int(val_split * len(dataset))
     train_size = len(dataset) - val_size
     train_set, val_set = torch.utils.data.random_split(dataset, [train_size, val_size])
-    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, drop_last=True, **kwargs)
-    val_loader = DataLoader(val_set, batch_size=batch_size, shuffle=False, **kwargs)
+    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, drop_last=True, num_workers=num_workers, pin_memory=pin_memory)
+    val_loader = DataLoader(val_set, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=pin_memory)
     return train_loader, val_loader
 
 def create_summary_writers(log_dir):

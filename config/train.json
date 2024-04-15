@@ -1,39 +1,39 @@
 {
-    "num_workers": 8,
-    "pin_memory": true,
-
-    "path" : {
-        "data" : "assets/data",
-        "log" : "log/training"
+    "log": {
+        "path": "log/training"
     },
 
-    "dataset" : {
-        "labels" : ["circle", "square", "star", "triangle"],
+    "dataset": {
+        "path": "assets/data",
+        "labels": ["circle", "square", "star", "triangle"],
+        "val_split": 0.1,
         "augmentations": {
             "enabled": true,
             "flip_ud": 0.5,
             "flip_lr": 0.5,
             "brightness_multiply": [1.2, 1.5],
             "rotate": [-90, 90],
-            "gaussian_blur": {
-                "apply_prob": 0.5,
-                "sigma": [0, 10]
-            }
+            "apply_prob": 0.5,
+            "sigma": [0, 10]
         }
     },
 
-    "arch" : {
-        "model" : "deeplabv3plus",
-        "encoder_name" : "resnet34",
-        "encoder_weights" : "imagenet",
-        "in_channels" : 3,
-        "classes" : 5
+    "arch": {
+        "model": "deeplabv3plus",
+        "encoder_name": "resnet34",
+        "encoder_weights": "imagenet",
+        "in_channels": 3,
+        "classes": 5
     },
 
-    "train" : {
-        "batch_size": 20,
-        "val_split": 0.1,
+    "train": {
         "lr": 0.00005,
         "epochs": 5000
+    },
+
+    "dataloader": {
+        "batch_size": 20,
+        "num_workers": 8,
+        "pin_memory": true
     }
 }
