@@ -11,8 +11,8 @@
             "enabled": true,
             "flip_ud": 0.5,
             "flip_lr": 0.5,
-            "brightness_multiply": [1.2, 1.5],
-            "rotate": [-90, 90],
+            "brightness_multiply": [0.5, 1.5],
+            "rotate": [-180, 180],
             "apply_prob": 0.5,
             "sigma": [0, 10]
         }

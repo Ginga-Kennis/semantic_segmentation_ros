@@ -18,7 +18,11 @@ class SemanticSegmentationServer:
     
     def load_parameters(self):
         self.color_topic = rospy.get_param("~color_topic")
-        self.model_path = Path(rospy.get_param("~model_path"))
+        self.model_path = Path(rospy.get_param("~model/model_path"))
+        self.encoder_name = rospy.get_param("~model/encoder_name")
+        self.encoder_weights = rospy.get_param("~model/encoder_weights")
+        self.in_channels = rospy.get_param("~model/in_channels")
+        self.classes = rospy.get_param("~model/classes")
         rospy.loginfo(self.color_topic)
         rospy.loginfo(self.model_path)
 
@@ -27,7 +31,7 @@ class SemanticSegmentationServer:
         rospy.Subscriber(self.color_topic, Image, self.sensor_cb)
 
     def init_semantic_segmentation_server(self):
-        self.ss_server =  SemanticSegmentation(self.model_path)
+        self.ss_server =  SemanticSegmentation(self.model_path, self.encoder_name, self.encoder_weights, self.in_channels, self.classes)
 
     def sensor_cb(self, msg):
         img = self.cv_bridge.imgmsg_to_cv2(msg).astype(np.float32)

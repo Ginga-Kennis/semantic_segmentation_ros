@@ -21,27 +21,27 @@ from semantic_segmentation_ros.networks import get_model
 def main(config):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # Log directory
-    time_stamp = datetime.now().strftime("%m%d%H%M")
+    # Create log directory
+    time_stamp = datetime.now().strftime("%m-%d-%H-%M")
     description = f'{time_stamp}, {config["arch"]["model"]}, {config["dataloader"]["batch_size"]}, {config["train"]["lr"]}'
     logdir = Path(config["log"]["path"]) / description 
+
+    # Create data loaders
+    train_loader, val_loader = create_train_val_loaders(**config["dataset"], **config["dataloader"])
 
     # Build the network
     model = get_model(**config["arch"]).to(device)
 
-    train_loader, val_loader = create_train_val_loaders(**config["dataset"], **config["dataloader"])
-
-    # Define optimizer and criterion(loss)
+    # Define optimizer, criterion and metrics
     optimizer = torch.optim.Adam(model.parameters(), lr=config["train"]["lr"])
     criterion = nn.CrossEntropyLoss()
-
-    # Create ignite engines for training and validation
-    trainer = create_supervised_trainer(model, optimizer, criterion, device)
-
     metrics = {
         "loss": Loss(criterion),
         "mIOU": MeanIoU(num_classes=5, device=device)
     }
+
+    # Create ignite engines for training and validation
+    trainer = create_supervised_trainer(model, optimizer, criterion, device)
     train_evaluator = create_supervised_evaluator(model, metrics=metrics, device=device)
     val_evaluator = create_supervised_evaluator(model, metrics=metrics, device=device)
 
@@ -75,9 +75,8 @@ def main(config):
     )
     val_evaluator.add_event_handler(Events.COMPLETED, model_checkpoint, {config["arch"]["model"]: model})
 
-    # run training
+    # Run the training loop
     trainer.run(train_loader, max_epochs=config["train"]["epochs"])
-
 
 def parse_args():
     parser = argparse.ArgumentParser()

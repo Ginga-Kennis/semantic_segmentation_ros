@@ -7,11 +7,11 @@ import imgaug.augmenters as iaa
 from torch.utils.data import Dataset
 
 class SegDataset(Dataset):
-    def __init__(self, dir, labels, augmentations):
+    def __init__(self, path, labels, augmentations):
         self.labels = labels
-        self.img_dir = os.path.join(dir, "img")
-        self.ann_dir = os.path.join(dir, "ann")
-        self.imgs = list(sorted(os.listdir(self.img_dir)))
+        self.img_path = os.path.join(path, "img")
+        self.ann_path = os.path.join(path, "ann")
+        self.imgs = list(sorted(os.listdir(self.img_path)))
 
         self.augmentations = augmentations
 
@@ -31,8 +31,8 @@ class SegDataset(Dataset):
         return len(self.imgs)
 
     def __getitem__(self,idx):
-        img_path = os.path.join(self.img_dir, self.imgs[idx])
-        mask_path = os.path.join(self.ann_dir, self.imgs[idx].replace('.png', '.json').replace('.jpg', '.json'))
+        img_path = os.path.join(self.img_path, self.imgs[idx])
+        mask_path = os.path.join(self.ann_path, self.imgs[idx].replace('.png', '.json').replace('.jpg', '.json'))
 
         img = get_image(img_path)
         mask = get_mask(img, mask_path, self.labels)
