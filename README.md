@@ -1,6 +1,6 @@
 # Semantic Segmentation ROS
 This repository contains a ROS package designed for semantic segmentation.
-![Demo Animation](assets/readme/deeplabv3.gif)
+![Demo Animation](assets/readme/deeplabv3_demo.gif)
 
 ## Installation
 The following instructions were tested with `python3.8` on Ubuntu 20.04.
@@ -34,7 +34,7 @@ source /path/to/catkin_ws/devel/setup.bash
 
 ## Network Training
 ```
-python3 scripts/train.py [--datadir] [--logdir] [--model] [--batch-size] [--val-split] [--lr] [--epochs]
+python3 scripts/train.py [--config]
 ```
 
 Training and validation metrics are logged to TensorBoard and can be accessed with
@@ -43,7 +43,7 @@ Training and validation metrics are logged to TensorBoard and can be accessed wi
 tensorboard --logdir=log/training
 ```
 
-## RealSense inference
+## RealSense Inference
 This package contains an example of realtime semantic segmentation with Intel Realsense D435.
 ```
 roslaunch semantic_segmentation_ros realsense_semantic_segmentation.launch
