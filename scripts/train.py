@@ -23,7 +23,7 @@ def main(config):
 
     # Create log directory
     time_stamp = datetime.now().strftime("%m-%d-%H-%M")
-    description = f'{time_stamp}, {config["arch"]["model"]}, {config["dataloader"]["batch_size"]}, {config["train"]["lr"]}'
+    description = f'{time_stamp}, {config["arch"]["model_name"]}, {config["dataloader"]["batch_size"]}, {config["train"]["lr"]}'
     logdir = Path(config["log"]["path"]) / description 
 
     # Create data loaders
@@ -73,7 +73,7 @@ def main(config):
         create_dir=True,
         global_step_transform=global_step_from_engine(trainer), 
     )
-    val_evaluator.add_event_handler(Events.COMPLETED, model_checkpoint, {config["arch"]["model"]: model})
+    val_evaluator.add_event_handler(Events.COMPLETED, model_checkpoint, {config["arch"]["model_name"]: model})
 
     # Run the training loop
     trainer.run(train_loader, max_epochs=config["train"]["epochs"])

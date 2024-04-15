@@ -19,7 +19,7 @@
     },
 
     "arch": {
-        "model": "deeplabv3plus",
+        "model_name": "deeplabv3plus",
         "encoder_name": "resnet34",
         "encoder_weights": "imagenet",
         "in_channels": 3,

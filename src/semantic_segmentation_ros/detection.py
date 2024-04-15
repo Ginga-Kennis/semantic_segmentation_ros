@@ -2,9 +2,9 @@ import torch
 from semantic_segmentation_ros.networks import load_model
 
 class SemanticSegmentation:
-    def __init__(self, model_path, encoder_name, encoder_weights, in_channels, classes):
+    def __init__(self, model_name, encoder_name, encoder_weights, in_channels, classes, model_path):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.model = load_model(model_path, encoder_name, encoder_weights, in_channels, classes, self.device)
+        self.model = load_model(model_name, encoder_name, encoder_weights, in_channels, classes, model_path,self.device)
         self.model.eval()
 
     def predict(self, img):
