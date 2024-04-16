@@ -1,4 +1,5 @@
 import os
+import random
 import cv2
 import json
 import torch
@@ -7,6 +8,9 @@ import imgaug as ia
 import imgaug.augmenters as iaa
 from torch.utils.data import Dataset
 from torchvision.transforms import v2
+from torchvision.transforms.functional import hflip, vflip, rotate
+
+from semantic_segmentation_ros.utils import vis_img_mask
 
 class SegDataset(Dataset):
     def __init__(self, path, labels, augmentations):
@@ -15,49 +19,44 @@ class SegDataset(Dataset):
         self.ann_path = os.path.join(path, "ann")
         self.imgs = list(sorted(os.listdir(self.img_path)))
 
-        self.augment = augmentations["enabled"]
-        self.img_transform, self.mask_transform = build_transforms(augmentations)
+        self.augmentations = augmentations
 
     def __len__(self):
         return len(self.imgs)
 
-    def __getitem__(self,idx):
+    def __getitem__(self, idx):
         img_path = os.path.join(self.img_path, self.imgs[idx])
         mask_path = os.path.join(self.ann_path, self.imgs[idx].replace('.png', '.json').replace('.jpg', '.json'))
 
-        img = torch.tensor(get_image(img_path))
-        mask = torch.tensor(get_mask(img, mask_path, self.labels))
+        img = torch.tensor(get_image(img_path), dtype=torch.float32)
+        mask = torch.tensor(get_mask(img, mask_path, self.labels), dtype=torch.float32)  # [num_classes, height, width]
 
-        if self.augment == True:
-            img, mask = apply_augmentation(img, mask, self.img_transform, self.mask_transform)
-
-        return img, mask
+        if self.augmentations["enabled"]:
+            aug_img, aug_mask = apply_transforms(img, mask, self.augmentations)
+            vis_img_mask(img, mask, aug_img, aug_mask)
+        return aug_img, aug_mask
     
-def build_transforms(augmentations):
-    img_transform_list = []
-    mask_transform_list = []
+def apply_transforms(img, mask, augmentations):
+    # Horizontal flip 
+    if random.random() > augmentations["flip_ud"]:
+        img = hflip(img)
+        mask = hflip(mask)
+    
+    # Vertical flip 
+    if random.random() > augmentations["flip_lr"]:
+        img = vflip(img)
+        mask = vflip(mask)
 
-    if augmentations['flip_lr'] > 0:
-        img_transform_list.append(v2.RandomHorizontalFlip(p=augmentations['flip_lr']))
-        mask_transform_list.append(v2.RandomHorizontalFlip(p=augmentations['flip_lr']))
-    if augmentations['flip_ud'] > 0:
-        img_transform_list.append(v2.RandomVerticalFlip(p=augmentations['flip_ud']))
-        mask_transform_list.append(v2.RandomVerticalFlip(p=augmentations['flip_ud']))
-    if augmentations['rotate'] != 0:
-        img_transform_list.append(v2.RandomRotation(degrees=augmentations['rotate']))
-        mask_transform_list.append(v2.RandomRotation(degrees=augmentations['rotate']))
-    if augmentations['brightness_multiply'] is not None:
-        img_transform_list.append(v2.RandomAdjustSharpness(sharpness_factor=2, p=0.5))  # Adjust sharpness as a proxy
-        img_transform_list.append(v2.ColorJitter(brightness=augmentations['brightness_multiply']))
-    if augmentations['sigma'][0] != 0:
-        img_transform_list.append(v2.RandomApply([v2.GaussianBlur(kernel_size=3, sigma=augmentations['sigma'])], p=augmentations['apply_prob']))
+    # Rotate randomly 
+    angle = random.uniform(augmentations["rotate"][0], augmentations["rotate"][1])
+    img = rotate(img, angle)
+    mask = rotate(mask, angle, fill=0)  # Use fill=0 for other mask channels
+    # Update the background channel specifically if rotation creates empty space
+    background = (mask[-1, :, :] == 0).float()  # Update background channel with empty spaces
+    mask[-1, :, :] = background
 
-    return v2.Compose(img_transform_list), v2.Compose(mask_transform_list)
+    return img, mask
 
-def apply_augmentation(img, mask, img_transform, mask_transform):
-    img_transformed = img_transform(img)
-    mask_transformed = mask_transform(mask)  # マスクは整数型で保持することが必要な場合が多いため、変換後に型を調整するかもしれません。
-    return img_transformed, mask_transformed
     
 def get_image(img_path):
     img = cv2.imread(img_path).astype(np.float32)
