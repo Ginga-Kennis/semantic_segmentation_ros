@@ -9,9 +9,7 @@
         "val_split": 0.1,
         "augmentations": {
             "enabled": true,
-            "flip_ud": 0.5,
-            "flip_lr": 0.5,
-            "rotate": [-180, 180]
+            "rotate": 180
         }
     },
 
@@ -24,7 +22,7 @@
     },
 
     "train": {
-        "lr": 0.00005,
+        "lr": 0.001,
         "epochs": 5000
     },
 
