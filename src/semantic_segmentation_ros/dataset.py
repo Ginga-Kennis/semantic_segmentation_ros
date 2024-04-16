@@ -1,10 +1,12 @@
 import os
 import cv2
 import json
+import torch
 import numpy as np
 import imgaug as ia
 import imgaug.augmenters as iaa
 from torch.utils.data import Dataset
+from torchvision.transforms import v2
 
 class SegDataset(Dataset):
     def __init__(self, path, labels, augmentations):
@@ -13,19 +15,8 @@ class SegDataset(Dataset):
         self.ann_path = os.path.join(path, "ann")
         self.imgs = list(sorted(os.listdir(self.img_path)))
 
-        self.augmentations = augmentations
-
-        if self.augmentations['enabled']:
-            self.seq = iaa.Sequential([
-                iaa.Fliplr(self.augmentations['flip_lr']),  # Horizontal flips
-                iaa.Flipud(self.augmentations['flip_ud']),  # Vertical flips
-                iaa.Multiply(self.augmentations['brightness_multiply']),  # Change brightness
-                iaa.Affine(rotate=self.augmentations['rotate']),  # Rotate
-                iaa.Sometimes(
-                    self.augmentations['apply_prob'],
-                    iaa.GaussianBlur(sigma=self.augmentations['sigma'])
-                )  # Apply Gaussian blur
-            ], random_order=True)
+        self.augment = augmentations["enabled"]
+        self.img_transform, self.mask_transform = build_transforms(augmentations)
 
     def __len__(self):
         return len(self.imgs)
@@ -34,22 +25,39 @@ class SegDataset(Dataset):
         img_path = os.path.join(self.img_path, self.imgs[idx])
         mask_path = os.path.join(self.ann_path, self.imgs[idx].replace('.png', '.json').replace('.jpg', '.json'))
 
-        img = get_image(img_path)
-        mask = get_mask(img, mask_path, self.labels)
+        img = torch.tensor(get_image(img_path))
+        mask = torch.tensor(get_mask(img, mask_path, self.labels))
 
-        if self.augmentations['enabled']:
-            img, mask = apply_augment(img, mask, self.seq)
+        if self.augment == True:
+            img, mask = apply_augmentation(img, mask, self.img_transform, self.mask_transform)
 
         return img, mask
     
-def apply_augment(img, mask, seq):
-    ia.seed(1)
-    seq_det = seq.to_deterministic()  
-    img_aug = np.transpose(img, (1, 2, 0))  # Convert (channel, height, width) to (height, width, channel) 
-    img_aug = seq_det.augment_image(img_aug)
-    mask_aug = np.array([seq_det.augment_image(channel) for channel in mask])
-    img_aug = np.transpose(img_aug, (2, 0, 1))  # Convert (height, width, channel) to (channel, height, width) 
-    return img_aug, mask_aug
+def build_transforms(augmentations):
+    img_transform_list = []
+    mask_transform_list = []
+
+    if augmentations['flip_lr'] > 0:
+        img_transform_list.append(v2.RandomHorizontalFlip(p=augmentations['flip_lr']))
+        mask_transform_list.append(v2.RandomHorizontalFlip(p=augmentations['flip_lr']))
+    if augmentations['flip_ud'] > 0:
+        img_transform_list.append(v2.RandomVerticalFlip(p=augmentations['flip_ud']))
+        mask_transform_list.append(v2.RandomVerticalFlip(p=augmentations['flip_ud']))
+    if augmentations['rotate'] != 0:
+        img_transform_list.append(v2.RandomRotation(degrees=augmentations['rotate']))
+        mask_transform_list.append(v2.RandomRotation(degrees=augmentations['rotate']))
+    if augmentations['brightness_multiply'] is not None:
+        img_transform_list.append(v2.RandomAdjustSharpness(sharpness_factor=2, p=0.5))  # Adjust sharpness as a proxy
+        img_transform_list.append(v2.ColorJitter(brightness=augmentations['brightness_multiply']))
+    if augmentations['sigma'][0] != 0:
+        img_transform_list.append(v2.RandomApply([v2.GaussianBlur(kernel_size=3, sigma=augmentations['sigma'])], p=augmentations['apply_prob']))
+
+    return v2.Compose(img_transform_list), v2.Compose(mask_transform_list)
+
+def apply_augmentation(img, mask, img_transform, mask_transform):
+    img_transformed = img_transform(img)
+    mask_transformed = mask_transform(mask)  # マスクは整数型で保持することが必要な場合が多いため、変換後に型を調整するかもしれません。
+    return img_transformed, mask_transformed
     
 def get_image(img_path):
     img = cv2.imread(img_path).astype(np.float32)
