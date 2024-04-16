@@ -1,4 +1,4 @@
-catkin_pkg
+catkin-pkg
 numpy
 pytorch-ignite
 matplotlib

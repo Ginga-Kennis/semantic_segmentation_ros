@@ -23,7 +23,7 @@ def main(config):
 
     # Create log directory
     time_stamp = datetime.now().strftime("%m-%d-%H-%M")
-    description = f'{time_stamp}, {config["arch"]["model_name"]}, {config["dataloader"]["batch_size"]}, {config["train"]["lr"]}'
+    description = f'{time_stamp},model={config["arch"]["model_name"]},batch_size={config["dataloader"]["batch_size"]},lr={config["train"]["lr"]}'
     logdir = Path(config["log"]["path"]) / description 
 
     # Create data loaders
