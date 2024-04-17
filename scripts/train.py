@@ -69,7 +69,7 @@ def main(config):
         # filename_prefix="best",
         score_function=lambda engine: engine.state.metrics['mIOU'],
         score_name="mIOU",
-        n_saved=1,
+        n_saved=5,
         create_dir=True,
         global_step_transform=global_step_from_engine(trainer), 
     )
