@@ -1,5 +1,4 @@
 import os
-import random
 import cv2
 import json
 import torch
@@ -29,26 +28,13 @@ class SegDataset(Dataset):
 
         img = torch.tensor(get_image(img_path), dtype=torch.float32)
         mask = torch.tensor(get_mask(img, mask_path, self.labels), dtype=torch.float32)  # [num_classes, height, width]
-
+        # vis_img_mask(img,mask)
         if self.augment == True:
-            aug_img, aug_mask = self.trans(tv_tensors.Image(img), tv_tensors.Mask(mask))
+            img, mask = self.trans(tv_tensors.Image(img), tv_tensors.Mask(mask))
+            mask = add_background(mask)
 
-            # TensorをNumPy配列に変換
-            aug_mask = aug_mask.data.numpy()
-            
-            # 変換後のマスクに背景チャンネルを追加
-            # 変換によって作成された余白は0であることを利用する
-            # チャンネルが0のピクセルは背景として1で塗りつぶす
-            background_channel = np.all(aug_mask == 0, axis=0).astype(np.float32)
-            
-            # 新しい背景チャンネルを追加
-            aug_mask = np.concatenate((background_channel[None, :], aug_mask), axis=0)
-
-            # Tensorに戻す
-            aug_img = aug_img.data  # Tensorに戻す
-            aug_mask = torch.tensor(aug_mask, dtype=torch.float32)
-            # vis_img_mask(img, mask, aug_img, aug_mask)
-        return aug_img, aug_mask
+        # vis_img_mask(img, mask)
+        return img, mask
     
 def build_transform(augmentations):
     trans = transforms.Compose([
@@ -56,6 +42,10 @@ def build_transform(augmentations):
     ])
     return trans
     
+def add_background(mask):
+    background = torch.all(mask == 0, dim=0, keepdim=True)
+    return torch.cat((mask, background), dim=0)
+
 def get_image(img_path):
     img = cv2.imread(img_path).astype(np.float32)
     if img is None:
