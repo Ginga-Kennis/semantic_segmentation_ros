@@ -3,7 +3,7 @@
   <arg name="rviz" default="true" />
 
   <!-- Load configuration -->
-  <rosparam command="load" file="$(find semantic_segmentation_ros)/config/realsense_d415.yaml" subst_value="true" />
+  <rosparam command="load" file="$(find semantic_segmentation_ros)/config/realsense.yaml" subst_value="true" />
 
     <!-- Launch camera driver -->
   <include file="$(find realsense2_camera)/launch/rs_camera.launch">

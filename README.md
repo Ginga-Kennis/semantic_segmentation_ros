@@ -33,6 +33,10 @@ source /path/to/catkin_ws/devel/setup.bash
 ```
 
 ## Network Training
+To train the network on a custom dataset, follow these steps:
+* Place your images in the `assets/data/img`  directory and the JSON files created with LabelMe in the `assets/data/ann` directory.   
+Ensure that each image has a corresponding JSON file with a matching name.
+* Configure the `config/train.json` file according to your training preferences and dataset specifications.  
 ```
 python3 scripts/train.py [--config]
 ```
@@ -44,7 +48,8 @@ tensorboard --logdir=log/training
 ```
 
 ## RealSense Inference
-This package contains an example of realtime semantic segmentation with Intel Realsense D435.
+This package contains an example of realtime semantic segmentation with Intel Realsense.  
+Configure the `config/realsense.yaml` file to suit your environment.
 ```
 roslaunch semantic_segmentation_ros realsense_semantic_segmentation.launch
 ```
