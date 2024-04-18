@@ -16,7 +16,7 @@ class SegDataset(Dataset):
         self.ann_path = os.path.join(path, "ann")
         self.imgs = list(sorted(os.listdir(self.img_path)))
 
-        self.augment = augmentations["enabled"]
+        self.augment = augmentations["enable"]
         self.trans = build_transform(augmentations)
 
     def __len__(self):
@@ -33,15 +33,22 @@ class SegDataset(Dataset):
             img, mask = self.trans(tv_tensors.Image(img), tv_tensors.Mask(mask))
             mask = add_background(mask)
 
-        # vis_img_mask(img, mask)
+        vis_img_mask(img, mask)
         return img, mask
     
 def build_transform(augmentations):
-    trans = transforms.Compose([
-        transforms.RandomAffine(degrees=augmentations["rotate"], translate=augmentations["translate"], scale=augmentations["scale"], shear=augmentations["shear"]),
-        transforms.RandomPerspective(distortion_scale=augmentations["rotate"], p=augmentations["translate"]),
-        transforms.ElasticTransform(alpha=augmentations["alpha"], sigma=augmentations["sigma"])
-    ])
+    transform_list = []
+
+    if augmentations["affine"]["enable"]:
+        transform_list.append(transforms.RandomAffine(degrees=augmentations["affine"]["rotate"], translate=augmentations["affine"]["translate"], scale=augmentations["affine"]["scale"], shear=augmentations["affine"]["shear"]))
+    
+    if augmentations["perspective"]["enable"]:
+        transform_list.append(transforms.RandomPerspective(distortion_scale=augmentations["perspective"]["distortion_scale"], p=augmentations["perspective"]["p"]))
+    
+    if augmentations["elastic"]["enable"]:
+        transform_list.append(transforms.ElasticTransform(alpha=augmentations["elastic"]["alpha"], sigma=augmentations["elastic"]["sigma"]))
+    
+    trans = transforms.Compose(transform_list)
     return trans
     
 def add_background(mask):
