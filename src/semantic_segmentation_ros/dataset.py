@@ -38,7 +38,9 @@ class SegDataset(Dataset):
     
 def build_transform(augmentations):
     trans = transforms.Compose([
-        transforms.RandomRotation(augmentations["rotate"])
+        transforms.RandomAffine(degrees=augmentations["rotate"], translate=augmentations["translate"], scale=augmentations["scale"], shear=augmentations["shear"]),
+        transforms.RandomPerspective(distortion_scale=augmentations["rotate"], p=augmentations["translate"]),
+        transforms.ElasticTransform(alpha=augmentations["alpha"], sigma=augmentations["sigma"])
     ])
     return trans
     
