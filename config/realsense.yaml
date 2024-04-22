@@ -6,5 +6,5 @@ semantic_segmentation_server:
     encoder_name : "resnet34"
     encoder_weights : "imagenet"
     in_channels : 3
-    classes : 5
-    model_path: $(find semantic_segmentation_ros)/assets/model/deeplabv3plus_637_mIOU=0.9592.pt
+    classes : 2
+    model_path: $(find semantic_segmentation_ros)/assets/model/deeplabv3plus_171_mIOU=0.9686.pt

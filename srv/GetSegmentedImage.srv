@@ -1,0 +1,5 @@
+# Request
+---
+
+# Response
+sensor_msgs/Image segmented_image
