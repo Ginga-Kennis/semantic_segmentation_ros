@@ -8,8 +8,25 @@
         "labels": ["circle", "square", "star", "triangle"],
         "val_split": 0.1,
         "augmentations": {
-            "enabled": true,
-            "rotate": 180
+            "enable" : true,
+            "affine" : {
+                "enable" : true,
+                "rotate" : [-180, 180],
+                "translate" : [0.2, 0.2],
+                "scale" : [0.5, 1.5],
+                "shear" : [0.8, 1.2],
+                "fill" : 255
+            },
+            "perspective" : {
+                "enable" : true,
+                "distortion_scale" : 0.5,
+                "p" : 0.5 
+            },
+            "elastic" : {
+                "enable" : true,
+                "alpha" : 30,
+                "sigma" : 5.0 
+            }
         }
     },
 
