@@ -53,3 +53,16 @@ Configure the `config/realsense.yaml` file to suit your environment.
 ```
 roslaunch semantic_segmentation_ros realsense_semantic_segmentation.launch
 ```
+
+### Subscribed Topics
+- **`/camera/color/image_raw`** (`sensor_msgs/Image`)
+  - The raw image stream from a camera, used as input for real-time semantic segmentation.
+
+### Published Topics
+- **`/segmentation_mask`** (`sensor_msgs/Image`)
+  - This topic outputs semantic predictions as a mono8 image, indicating semantic classes at each pixel.
+
+- **`/segmentation_image`** (`sensor_msgs/Image`)
+  - This topic outputs a colored RGB version of the semantic predictions for visualization purposes, as a bgr8 image.
+
+
