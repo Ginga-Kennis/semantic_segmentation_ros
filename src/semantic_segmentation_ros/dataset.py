@@ -33,7 +33,7 @@ class SegDataset(Dataset):
             img, mask = self.trans(tv_tensors.Image(img), tv_tensors.Mask(mask))
             mask = add_background(mask)
 
-        vis_img_mask(img, mask)
+        # vis_img_mask(img, mask)
         return img, mask
     
 def build_transform(augmentations):
