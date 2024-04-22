@@ -20,10 +20,10 @@ class Visualizer:
         return np.vstack([rgb_colors, np.array([0, 0, 0], dtype=np.uint8)])
     
     def create_segmented_image_publisher(self):
-        self.segmented_image_pub = rospy.Publisher("segmentation_image", Image, queue_size=1)
+        self.segmentation_image_pub = rospy.Publisher("segmentation_image", Image, queue_size=1)
 
     def publish_segmented_image(self, mask_pred):
         seg_img = self.colors[mask_pred]
         msg = self.cv_bridge.cv2_to_imgmsg(seg_img, "bgr8")
-        self.segmented_image_pub.publish(msg)
+        self.segmentation_image_pub.publish(msg)
     
