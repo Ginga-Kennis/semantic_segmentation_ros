@@ -24,6 +24,6 @@ class Visualizer:
 
     def publish_segmented_image(self, mask_pred):
         seg_img = self.colors[mask_pred]
-        msg = self.cv_bridge.cv2_to_imgmsg(seg_img, "bgr8")
+        msg = self.cv_bridge.cv2_to_imgmsg(seg_img, "rgb8")
         self.segmentation_image_pub.publish(msg)
     

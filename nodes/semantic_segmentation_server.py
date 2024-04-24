@@ -3,6 +3,7 @@
 import rospy
 import cv2
 import cv_bridge
+import torch
 import numpy as np
 from pathlib import Path
 from sensor_msgs.msg import Image
@@ -16,9 +17,10 @@ class SemanticSegmentationServer:
         self.load_parameters()
         self.init_pubsub()
         self.init_services()
-
+        
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.cv_bridge = cv_bridge.CvBridge()
-        self.segmentation_model = SemanticSegmentation(self.model_name, self.encoder_name, self.encoder_weights, self.in_channels, self.classes, self.model_path)
+        self.segmentation_model = SemanticSegmentation(self.model_name, self.encoder_name, self.encoder_weights, self.in_channels, self.classes, self.model_path, self.device)
         self.vis = Visualizer(self.classes)
 
         rospy.loginfo("Semantic Segmentation Server is ready")

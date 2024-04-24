@@ -16,6 +16,6 @@ def get_model(model_name, encoder_name, encoder_weights, in_channels, classes):
     return model(encoder_name=encoder_name, encoder_weights=encoder_weights, in_channels=in_channels, classes=classes)
 
 def load_model(model_name, encoder_name, encoder_weights, in_channels, classes, path, device):
-    net = get_model(model_name, encoder_name, encoder_weights, in_channels, classes).to(device)
-    net.load_state_dict(torch.load(path, map_location=device))
-    return net
+    model = get_model(model_name, encoder_name, encoder_weights, in_channels, classes).to(device)
+    model.load_state_dict(torch.load(path, map_location=device))
+    return model
