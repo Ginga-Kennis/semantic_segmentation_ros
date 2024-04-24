@@ -8,7 +8,10 @@ class SemanticSegmentation:
         self.model.eval()
 
     def predict(self, img):
-        img = torch.from_numpy(img).permute(2, 0, 1).unsqueeze(0).to(self.device)
+        """
+        Inputs a RGB image with shape (channel, height, width)
+        """
+        img = torch.from_numpy(img).unsqueeze(0).to(self.device)
         
         with torch.no_grad():
             y_pred = self.model(img)

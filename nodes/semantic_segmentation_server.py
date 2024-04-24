@@ -41,7 +41,7 @@ class SemanticSegmentationServer:
 
     def rgb_image_callback(self, msg):
         try:
-            mask_pred = self.segmentation_model.predict(self.cv_bridge.imgmsg_to_cv2(msg, "bgr8").astype(np.float32))
+            mask_pred = self.segmentation_model.predict(self.cv_bridge.imgmsg_to_cv2(msg, "rgb8").transpose(2,0,1).astype(np.float32))
 
             # publish mask
             self.latest_mask_pred = self.cv_bridge.cv2_to_imgmsg(mask_pred.astype(np.uint8), "mono8")
