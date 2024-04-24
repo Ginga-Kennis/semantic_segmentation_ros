@@ -6,7 +6,6 @@
     "dataset": {
         "path": "assets/data",
         "labels": ["circle", "square", "star", "triangle"],
-        "val_split": 0.1,
         "augmentations": {
             "enable" : true,
             "affine" : {

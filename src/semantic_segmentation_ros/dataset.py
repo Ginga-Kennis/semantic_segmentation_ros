@@ -10,7 +10,7 @@ from torchvision import tv_tensors
 from semantic_segmentation_ros.utils import vis_img_mask
 
 class SegDataset(Dataset):
-    def __init__(self, path, labels, augmentations):
+    def __init__(self, path, labels, augmentations, is_train=True):
         self.labels = labels
         self.img_path = os.path.join(path, "img")
         self.ann_path = os.path.join(path, "ann")
@@ -18,6 +18,8 @@ class SegDataset(Dataset):
 
         self.augment = augmentations["enable"]
         self.trans = build_transform(augmentations)
+
+        self.is_train = is_train
 
     def __len__(self):
         return len(self.imgs)
@@ -28,12 +30,11 @@ class SegDataset(Dataset):
 
         img = torch.tensor(get_image(img_path), dtype=torch.float32)
         mask = torch.tensor(get_mask(img, mask_path, self.labels), dtype=torch.float32)  # [num_classes, height, width]
-        # vis_img_mask(img,mask)
-        if self.augment == True:
-            img, mask = self.trans(tv_tensors.Image(img), tv_tensors.Mask(mask))
-            mask = add_background(mask)
 
-        # vis_img_mask(img, mask)
+        if self.is_train == True and self.augment == True:
+            img, mask = self.trans(tv_tensors.Image(img), tv_tensors.Mask(mask))
+        mask = add_background(mask)
+
         return img, mask
     
 def build_transform(augmentations):

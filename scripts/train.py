@@ -87,13 +87,12 @@ def parse_args():
         config = json.load(config_file)
     return config
 
-def create_train_val_loaders(path, labels, val_split, augmentations, batch_size, num_workers, pin_memory):
-    dataset = SegDataset(path, labels, augmentations)
-    val_size = int(val_split * len(dataset))
-    train_size = len(dataset) - val_size
-    train_set, val_set = torch.utils.data.random_split(dataset, [train_size, val_size])
-    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, drop_last=True, num_workers=num_workers, pin_memory=pin_memory)
-    val_loader = DataLoader(val_set, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=pin_memory)
+def create_train_val_loaders(path, labels, augmentations, batch_size, num_workers, pin_memory):
+    train_dataset = SegDataset(path + "/train", labels, augmentations, is_train=True)
+    val_dataset = SegDataset(path + "/val", labels, augmentations, is_train=False)
+
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, drop_last=True, num_workers=num_workers, pin_memory=pin_memory)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=pin_memory)
     return train_loader, val_loader
 
 def create_summary_writers(log_dir):
