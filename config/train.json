@@ -1,6 +1,6 @@
 {
     "log": {
-        "path": "log/training"
+        "path": "log/training/"
     },
 
     "dataset": {
