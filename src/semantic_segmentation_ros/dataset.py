@@ -1,11 +1,10 @@
 import os
 import torch
-import numpy as np
 from torch.utils.data import Dataset
 import torchvision.transforms.v2 as transforms
 from torchvision import tv_tensors
 
-from semantic_segmentation_ros.utils import get_image, get_labelme_mask, vis_img_mask
+from semantic_segmentation_ros.utils.data_utils import get_rgb_img_tensor, get_labelme_mask_tensor
 
 class SegDataset(Dataset):
     """A dataset class for semantic segmentation which handles data loading, augmentations, and preprocessing.
@@ -43,8 +42,8 @@ class SegDataset(Dataset):
         img_path = os.path.join(self.img_path, self.imgs[idx])
         mask_path = os.path.join(self.ann_path, self.anns[idx])
 
-        img = torch.tensor(get_image(img_path), dtype=torch.float32)
-        mask = torch.tensor(get_labelme_mask(img, mask_path, self.labels), dtype=torch.float32)  # [num_classes, height, width]
+        img = get_rgb_img_tensor(img_path)
+        mask = get_labelme_mask_tensor(mask_path, self.labels) 
 
         if self.is_train == True and self.augment == True:
             img, mask = self.trans(tv_tensors.Image(img), tv_tensors.Mask(mask))
