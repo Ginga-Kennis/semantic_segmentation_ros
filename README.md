@@ -1,6 +1,6 @@
 # Semantic Segmentation ROS
 This repository contains a ROS package designed for semantic segmentation.
-![Demo Animation](assets/readme/deeplabv3plus_demo.gif)
+![Demo Animation](assets/readme/demo.gif)
 
 ## Installation
 The following instructions were tested with `python3.8` on Ubuntu 20.04.
@@ -34,7 +34,8 @@ source /path/to/catkin_ws/devel/setup.bash
 
 ## Network Training
 To train the network on a custom dataset, follow these steps:
-* Place your images in the `assets/data/img`  directory and the JSON files created with LabelMe in the `assets/data/ann` directory.   
+* Place your training images in the `assets/data/train/img`  directory and the JSON files created with LabelMe in the `assets/data/train/ann` directory. 
+Place your validation images in the `assets/data/val/img`  directory and the JSON files created with LabelMe in the `assets/data/val/ann` directory.   
 Ensure that each image has a corresponding JSON file with a matching name.
 * Configure the `config/train.json` file according to your training preferences and dataset specifications.  
 ```
@@ -64,5 +65,15 @@ roslaunch semantic_segmentation_ros realsense_semantic_segmentation.launch
 
 - **`/segmentation_image`** (`sensor_msgs/Image`)
   - This topic outputs a colored RGB version of the semantic predictions for visualization purposes, as a bgr8 image.
+
+### ROS Services
+
+- **`/get_segmentation_mask`** (`semantic_segmentation_ros/GetSegmentationMask`)
+  - This service allows for on-demand retrieval of the latest semantic segmentation mask. When called, it returns a `sensor_msgs/Image` containing the semantic mask as a mono8 image, where each pixel's intensity corresponds to a class index.
+
+  **Service Details:**
+  - **Request**: Empty  
+  - **Response**: `sensor_msgs/Image` (the segmentation mask as mono8)
+
 
 

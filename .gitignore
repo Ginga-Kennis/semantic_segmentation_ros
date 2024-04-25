@@ -2,3 +2,7 @@ __pycache__/
 .venv/
 log/
 *.pt
+*.jpg
+*.jpeg
+*.png
+*.json
