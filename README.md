@@ -1,6 +1,6 @@
 # Semantic Segmentation ROS
 This repository contains a ROS package designed for semantic segmentation.
-![Demo Animation](assets/readme/deeplabv3plus_demo.gif)
+![Demo Animation](assets/readme/example.gif)
 
 ## Installation
 The following instructions were tested with `python3.8` on Ubuntu 20.04.
