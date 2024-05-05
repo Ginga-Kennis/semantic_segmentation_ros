@@ -40,7 +40,7 @@ def main(config: dict) -> None:
     model = get_model(**config["arch"]).to(device)
 
     # Define optimizer, criterion and metrics
-    optimizer = torch.optim.Adam(model.parameters(), lr=config["train"]["lr"])
+    optimizer = torch.optim.AdamW(model.parameters(), lr=config["train"]["lr"], weight_decay=0.01)
     criterion = nn.CrossEntropyLoss()
     metrics = {
         "loss": Loss(criterion),

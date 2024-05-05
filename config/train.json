@@ -4,8 +4,8 @@
     },
 
     "dataset": {
-        "path": "assets/data",
-        "labels": ["circle", "square", "star", "triangle"],
+        "path": "assets/dataset",
+        "labels": ["specular", "transparent", "opaque"],
         "augmentations": {
             "enable" : true,
             "affine" : {
@@ -31,19 +31,19 @@
 
     "arch": {
         "model_name": "deeplabv3plus",
-        "encoder_name": "resnet34",
+        "encoder_name": "resnet50",
         "encoder_weights": "imagenet",
         "in_channels": 3,
-        "classes": 5
+        "classes": 4
     },
 
     "train": {
-        "lr": 0.00005,
-        "epochs": 5000
+        "lr": 0.00001,
+        "epochs": 1500
     },
 
     "dataloader": {
-        "batch_size": 20,
+        "batch_size": 60,
         "num_workers": 8,
         "pin_memory": true
     }

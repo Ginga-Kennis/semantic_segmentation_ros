@@ -5,6 +5,7 @@ import torchvision.transforms.v2 as transforms
 from torchvision import tv_tensors
 
 from semantic_segmentation_ros.utils.data_utils import get_rgb_img_tensor, get_labelme_mask_tensor
+from semantic_segmentation_ros.utils.vis_utils import vis_img_mask
 
 class SegDataset(Dataset):
     """A dataset class for semantic segmentation which handles data loading, augmentations, and preprocessing.
@@ -49,7 +50,7 @@ class SegDataset(Dataset):
             img, mask = self.trans(tv_tensors.Image(img), tv_tensors.Mask(mask))
 
         mask = add_background(mask)
-
+        # vis_img_mask(img, mask)
         return img, mask
     
 def build_transform(augmentations: dict) -> transforms.Compose:
