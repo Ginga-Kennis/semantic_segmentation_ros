@@ -53,27 +53,28 @@ def get_labelme_mask_tensor(mask_path: str, labels: list) -> torch.tensor:
     # class in mask
     cls = [x['label'] for x in shape_dicts]
     
-    # points of each class
-    poly = [np.array(x['points'], dtype=np.int32) for x in shape_dicts]
-
-    # dictionary where key:label, value:points
-    label2poly = dict(zip(cls, poly))
+    # dictionary where key:label, value:list of points
+    label2poly = {}
+    for x in shape_dicts:
+        if x['label'] not in label2poly:
+            label2poly[x['label']] = []
+        label2poly[x['label']].append(np.array(x['points'], dtype=np.int32))
 
     # define background
     height = data["imageHeight"]
     width = data["imageWidth"]
 
     for label in labels:
-        
         blank = np.zeros(shape=(height, width), dtype=np.float32)
         
-        if label in cls:
-            cv2.fillPoly(blank, [label2poly[label]], 1)
+        if label in label2poly:
+            for poly_points in label2poly[label]:
+                cv2.fillPoly(blank, [poly_points], 1)
             
         channels.append(blank)
 
     Y = np.stack(channels, axis=0)
-    return torch.tensor(Y, dtype=torch.float32) 
+    return torch.tensor(Y, dtype=torch.float32)
 
 def get_coco_mask():
     pass
