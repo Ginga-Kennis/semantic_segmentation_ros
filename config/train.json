@@ -4,8 +4,8 @@
     },
 
     "dataset": {
-        "path": "assets/dataset",
-        "labels": ["specular", "transparent", "opaque"],
+        "path": "assets/data",
+        "labels": ["circle", "triangle", "square", "star"],
         "augmentations": {
             "enable" : true,
             "affine" : {
@@ -34,7 +34,7 @@
         "encoder_name": "resnet50",
         "encoder_weights": "imagenet",
         "in_channels": 3,
-        "classes": 4
+        "classes": 5
     },
 
     "train": {
@@ -43,7 +43,7 @@
     },
 
     "dataloader": {
-        "batch_size": 60,
+        "batch_size": 20,
         "num_workers": 8,
         "pin_memory": true
     }
