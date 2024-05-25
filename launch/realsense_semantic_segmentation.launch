@@ -11,6 +11,7 @@
     <arg name="color_width" value="320" />
     <arg name="color_height" value="240" />
     <arg name="color_fps" value="6" />
+    <arg name="publish_tf" value="false" />
   </include>
 
   <!-- Launch Nodes -->

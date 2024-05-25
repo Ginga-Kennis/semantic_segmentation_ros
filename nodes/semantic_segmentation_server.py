@@ -78,7 +78,7 @@ class SemanticSegmentationServer:
             )
 
             # publish mask
-            self.latest_mask_pred = self.cv_bridge.cv2_to_imgmsg(mask_pred.astype(np.uint8), "mono8")
+            self.latest_mask_pred = self.cv_bridge.cv2_to_imgmsg(np.argmax(mask_pred,0).astype(np.uint8), "mono8")
             self.segmentation_mask_pub.publish(self.latest_mask_pred)
 
             # publish image

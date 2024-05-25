@@ -34,6 +34,5 @@ class SemanticSegmentation:
         
         with torch.no_grad():
             y_pred = self.model(img)
-            y_pred = y_pred.argmax(1)
         
         return y_pred.cpu().squeeze(0).numpy()

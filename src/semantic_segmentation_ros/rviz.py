@@ -5,14 +5,14 @@ import numpy as np
 from sensor_msgs.msg import Image
 
 class Visualizer:
-    def __init__(self,classes: int):
+    def __init__(self, classes: int):
         """
         Initialize the Visualizer object with the number of classes.
 
         Input:
             classes (int): Total number of classes, including background.
         """
-        self.classes = classes - 1 # Exclude background
+        self.classes = classes - 1  # Exclude background
         self.cv_bridge = cv_bridge.CvBridge()
         self.colors = self.generate_colors()
         self.create_segmented_image_publisher()
@@ -30,7 +30,7 @@ class Visualizer:
         hsv_colors = np.stack([hues, saturation, value], axis=-1)
         rgb_colors = cv2.cvtColor(hsv_colors.reshape(1, -1, 3), cv2.COLOR_HSV2BGR).reshape(-1, 3)
         return np.vstack([rgb_colors, np.array([0, 0, 0], dtype=np.uint8)])
-    
+
     def create_segmented_image_publisher(self) -> None:
         """
         Create a ROS publisher for the segmented images.
@@ -42,9 +42,22 @@ class Visualizer:
         Publish the segmented image to a ROS topic.
 
         Input:
-            mask_pred (np.ndarray): A 2D numpy array where each element is the class index for that pixel.
+            mask_pred (np.ndarray): A 4D numpy array where each element is the probability for that pixel.
         """
-        seg_img = self.colors[mask_pred]
+
+        # Get the class with the highest probability for each pixel
+        class_indices = np.argmax(mask_pred, axis=0)
+        max_probs = np.max(mask_pred, axis=0)
+        max_probs = max_probs / max_probs.max()
+        
+        # Create the color image based on the class indices and their probabilities
+        seg_img = np.zeros((mask_pred.shape[1], mask_pred.shape[2], 3), dtype=np.uint8)
+        for c in range(self.classes):
+            color = self.colors[c]
+            mask = class_indices == c
+            seg_img[mask] = (color * max_probs[mask][..., np.newaxis]).astype(np.uint8)
+
         msg = self.cv_bridge.cv2_to_imgmsg(seg_img, "rgb8")
         self.segmentation_image_pub.publish(msg)
+
     
