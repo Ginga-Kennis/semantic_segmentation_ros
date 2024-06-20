@@ -2,9 +2,9 @@ catkin-pkg
 numpy
 pytorch-ignite
 matplotlib
+protobuf==4.25.3
 tensorboard
 pyyaml
 tqdm
 torch
-imgaug
 segmentation-models-pytorch
