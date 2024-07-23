@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import rospy
+import cv2
 import cv_bridge
 import torch
 import numpy as np
@@ -8,7 +9,7 @@ from sensor_msgs.msg import Image
 
 from semantic_segmentation_ros.detection import SemanticSegmentation
 from semantic_segmentation_ros.rviz import Visualizer
-from semantic_segmentation_ros.srv import GetSegmentedImage, GetSegmentedImageResponse
+from semantic_segmentation_ros.srv import GetSegmentedImage, GetSegmentedImageResponse, GetSegmentedDepthImage, GetSegmentedDepthImageResponse
 
 class SemanticSegmentationServer:
     def __init__(self) -> None:
@@ -38,6 +39,7 @@ class SemanticSegmentationServer:
         Outputs: None
         """
         self.color_topic = rospy.get_param("~camera/color_topic")
+        self.depth_topic = rospy.get_param("~camera/depth_topic")
         self.model_name = rospy.get_param("~model/model_name")
         self.encoder_name = rospy.get_param("~model/encoder_name")
         self.encoder_weights = rospy.get_param("~model/encoder_weights")
@@ -54,6 +56,7 @@ class SemanticSegmentationServer:
         """
         self.segmentation_mask_pub = rospy.Publisher("segmentation_mask", Image, queue_size=1)
         rospy.Subscriber(self.color_topic, Image, self.rgb_image_callback)
+        rospy.Subscriber(self.depth_topic, Image, self.depth_image_callback)
 
     def init_services(self) -> None:
         """
@@ -63,6 +66,7 @@ class SemanticSegmentationServer:
         Outputs: None
         """
         rospy.Service("get_segmentation_image", GetSegmentedImage, self.get_segmentation_image)
+        rospy.Service("get_segmented_depth_image", GetSegmentedDepthImage, self.get_segmented_depth_image)
 
     def rgb_image_callback(self, msg: Image) -> None:
         """
@@ -73,19 +77,26 @@ class SemanticSegmentationServer:
         Outputs: None
         """
         try:
-            mask_pred = self.segmentation_model.predict(
+            self.mask_pred = self.segmentation_model.predict(
                 self.cv_bridge.imgmsg_to_cv2(msg, "rgb8").transpose(2,0,1).astype(np.float32)
             )
 
             # publish mask
-            self.latest_mask_pred = self.cv_bridge.cv2_to_imgmsg(np.argmax(mask_pred,0).astype(np.uint8), "mono8")
+            self.latest_mask_pred = self.cv_bridge.cv2_to_imgmsg(np.argmax(self.mask_pred,0).astype(np.uint8), "mono8")
             self.segmentation_mask_pub.publish(self.latest_mask_pred)
 
             # publish image
-            self.vis.publish_segmented_image(mask_pred) 
+            self.vis.publish_segmented_image(self.mask_pred) 
             
         except Exception as e:
             rospy.logerr(f"Failed to Process Image : {e}")
+
+    def depth_image_callback(self, msg: Image) -> None:
+        try:
+            depth_image = self.cv_bridge.imgmsg_to_cv2(msg).astype(np.float32)
+            self.latest_depth_image = cv2.resize(depth_image, (320, 240), interpolation=cv2.INTER_NEAREST)
+        except Exception as e:
+            rospy.logerr(f"Failed to Process Depth Image : {e}")
 
     def get_segmentation_image(self, req) -> GetSegmentedImageResponse:
         """
@@ -98,6 +109,19 @@ class SemanticSegmentationServer:
             rospy.logwarn("No Segmented Image Available")
             return GetSegmentedImageResponse()
         return GetSegmentedImageResponse(self.latest_mask_pred)
+    
+    def get_segmented_depth_image(self, req) -> GetSegmentedDepthImageResponse:
+        mask = np.argmax(self.mask_pred,0).astype(np.uint8)
+        depth_image = self.latest_depth_image.copy()
+
+        mask_condition = (mask == 0) | (mask == 1)
+        depth_image[mask_condition] = 0
+
+        segmented_depth_image = self.cv_bridge.cv2_to_imgmsg(depth_image, "passthrough")
+        return GetSegmentedDepthImageResponse(segmented_depth_image)
+
+        
+        
 
 
 if __name__ == "__main__":

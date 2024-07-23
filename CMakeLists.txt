@@ -11,6 +11,7 @@ catkin_python_setup()
 add_service_files(
   FILES
   GetSegmentedImage.srv
+  GetSegmentedDepthImage.srv
 )
 
 generate_messages(
