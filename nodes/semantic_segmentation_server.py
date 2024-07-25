@@ -112,18 +112,19 @@ class SemanticSegmentationServer:
     
     def get_segmented_depth_image(self, req) -> GetSegmentedDepthImageResponse:
         mask = np.argmax(self.mask_pred,0).astype(np.uint8)
-        depth_image = self.latest_depth_image.copy()
 
         mask_condition = (mask == 0) | (mask == 1)
-        depth_image[mask_condition] = 0
+        mask_condition = mask_condition.astype(np.uint8) 
+
+        kernel = np.ones((15, 15), np.uint8)
+        dilated_mask_condition = cv2.dilate(mask_condition, kernel, iterations=1)
+
+        depth_image = self.latest_depth_image.copy()
+        depth_image[dilated_mask_condition == 1] = 0
 
         segmented_depth_image = self.cv_bridge.cv2_to_imgmsg(depth_image, "passthrough")
         return GetSegmentedDepthImageResponse(segmented_depth_image)
-
-        
-        
-
-
+    
 if __name__ == "__main__":
     rospy.init_node("semantic_segmentation_server")
     server = SemanticSegmentationServer()
