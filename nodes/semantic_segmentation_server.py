@@ -5,6 +5,7 @@ import cv2
 import cv_bridge
 import torch
 import numpy as np
+import matplotlib.pyplot as plt
 from sensor_msgs.msg import Image
 
 from semantic_segmentation_ros.detection import SemanticSegmentation
@@ -93,8 +94,7 @@ class SemanticSegmentationServer:
 
     def depth_image_callback(self, msg: Image) -> None:
         try:
-            depth_image = self.cv_bridge.imgmsg_to_cv2(msg).astype(np.float32)
-            self.latest_depth_image = cv2.resize(depth_image, (320, 240), interpolation=cv2.INTER_NEAREST)
+            self.latest_depth_image = self.cv_bridge.imgmsg_to_cv2(msg).astype(np.float32)
         except Exception as e:
             rospy.logerr(f"Failed to Process Depth Image : {e}")
 
@@ -111,17 +111,16 @@ class SemanticSegmentationServer:
         return GetSegmentedImageResponse(self.latest_mask_pred)
     
     def get_segmented_depth_image(self, req) -> GetSegmentedDepthImageResponse:
-        mask = np.argmax(self.mask_pred,0).astype(np.uint8)
+        mask = cv2.resize(np.argmax(self.mask_pred,0).astype(np.uint8), (640,480))
 
         mask_condition = (mask == 0) | (mask == 1)
         mask_condition = mask_condition.astype(np.uint8) 
 
-        kernel = np.ones((15, 15), np.uint8)
+        kernel = np.ones((50, 50), np.uint8)
         dilated_mask_condition = cv2.dilate(mask_condition, kernel, iterations=1)
 
         depth_image = self.latest_depth_image.copy()
         depth_image[dilated_mask_condition == 1] = 0
-
         segmented_depth_image = self.cv_bridge.cv2_to_imgmsg(depth_image, "passthrough")
         return GetSegmentedDepthImageResponse(segmented_depth_image)
     
