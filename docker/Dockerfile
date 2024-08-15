@@ -7,10 +7,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 # Install basic utilities and add ROS repository
 RUN apt-get update && apt-get install -y \
     lsb-release \
-    gnupg2 \
-    wget \
     curl \
-    software-properties-common \
     git \
     vim \
     && rm -rf /var/lib/apt/lists/*
