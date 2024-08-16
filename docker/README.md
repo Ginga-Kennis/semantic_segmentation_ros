@@ -6,10 +6,12 @@ docker build -t semantic_segmentation_ros_img .
 # Run Docker container
 ```
 docker run -it \
+    -v /{PATH}/{TO}/semantic_segmentation_ros:/home/{USERNAME}/catkin_ws/src/semantic_segmentation_ros \
+    --user {USERNAME} \
     --gpus all \
-    --name semantic_segmentation_ros_cont \
     --shm-size=18g \
     -p 6006:6006 \
+    --name semantic_segmentation_ros_cont \
     semantic_segmentation_ros_img /bin/bash
 ```
 
