@@ -4,8 +4,8 @@ semantic_segmentation_server:
     depth_topic : /camera/depth/image_rect_raw
   model:
     model_name : "deeplabv3plus"
-    encoder_name : "resnet50"
+    encoder_name : "efficientnet-b5"
     encoder_weights : "imagenet"
     in_channels : 3
     classes : 4
-    model_path: $(find semantic_segmentation_ros)/assets/model/deeplabv3plus_1499_mIOU=0.9357.pt
+    model_path: $(find semantic_segmentation_ros)/assets/model/deeplabv3plus_efficientnetb5_1334_mIOU=0.9342.pt
