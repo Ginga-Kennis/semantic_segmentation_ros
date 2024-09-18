@@ -31,7 +31,7 @@
 
     "arch": {
         "model_name": "deeplabv3plus",
-        "encoder_name": "efficientnet-b5",
+        "encoder_name": "resnet50",
         "encoder_weights": "imagenet",
         "in_channels": 3,
         "classes": 4
@@ -43,7 +43,7 @@
     },
 
     "dataloader": {
-        "batch_size": 10,
+        "batch_size": 20,
         "num_workers": 8,
         "pin_memory": true
     }
