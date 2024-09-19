@@ -35,7 +35,7 @@ class Visualizer:
         """
         Create a ROS publisher for the segmented images.
         """
-        self.segmentation_image_pub = rospy.Publisher("segmentation_image", Image, queue_size=1)
+        self.segmentation_image_pub = rospy.Publisher("~segmentation_image", Image, queue_size=1)
 
     def publish_segmented_image(self, mask_pred: np.ndarray) -> None:
         """

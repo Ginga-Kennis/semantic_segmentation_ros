@@ -55,7 +55,7 @@ class SemanticSegmentationServer:
         Inputs: None
         Outputs: None
         """
-        self.segmentation_mask_pub = rospy.Publisher("segmentation_mask", Image, queue_size=1)
+        self.segmentation_mask_pub = rospy.Publisher("~segmentation_mask", Image, queue_size=1)
         rospy.Subscriber(self.color_topic, Image, self.rgb_image_callback)
         rospy.Subscriber(self.depth_topic, Image, self.depth_image_callback)
 
