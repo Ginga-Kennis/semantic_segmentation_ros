@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>semantic_segmentation_ros</name>
-  <version>0.0.0</version>
+  <version>1.0.0</version>
   <description>The ROS Semantic Segmentation Package</description>
 
   <maintainer email="gingakennis123@icloud.com">Ginga Kennis</maintainer>
