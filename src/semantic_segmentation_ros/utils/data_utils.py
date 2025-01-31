@@ -1,7 +1,9 @@
-import cv2
 import json
-import torch
+
+import cv2
 import numpy as np
+import torch
+
 
 def get_rgb_img_tensor(img_path: str) -> torch.tensor:
     """
@@ -18,6 +20,7 @@ def get_rgb_img_tensor(img_path: str) -> torch.tensor:
         raise FileNotFoundError(f"Image not found: {img_path}")
     return torch.tensor(np.transpose(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), (2, 0, 1)), dtype=torch.float32)
 
+
 def get_bgr_img_tensor(img_path: str) -> torch.tensor:
     """
     Read an image from the given path and return it in BGR format.
@@ -32,6 +35,7 @@ def get_bgr_img_tensor(img_path: str) -> torch.tensor:
     if img is None:
         raise FileNotFoundError(f"Image not found: {img_path}")
     return torch.tensor(np.transpose(img, (2, 0, 1)), dtype=torch.float32)
+
 
 def get_labelme_mask_tensor(mask_path: str, labels: list) -> torch.tensor:
     """
@@ -50,15 +54,12 @@ def get_labelme_mask_tensor(mask_path: str, labels: list) -> torch.tensor:
 
     channels = []
 
-    # class in mask
-    cls = [x['label'] for x in shape_dicts]
-    
     # dictionary where key:label, value:list of points
     label2poly = {}
     for x in shape_dicts:
-        if x['label'] not in label2poly:
-            label2poly[x['label']] = []
-        label2poly[x['label']].append(np.array(x['points'], dtype=np.int32))
+        if x["label"] not in label2poly:
+            label2poly[x["label"]] = []
+        label2poly[x["label"]].append(np.array(x["points"], dtype=np.int32))
 
     # define background
     height = data["imageHeight"]
@@ -66,15 +67,16 @@ def get_labelme_mask_tensor(mask_path: str, labels: list) -> torch.tensor:
 
     for label in labels:
         blank = np.zeros(shape=(height, width), dtype=np.float32)
-        
+
         if label in label2poly:
             for poly_points in label2poly[label]:
                 cv2.fillPoly(blank, [poly_points], 1)
-            
+
         channels.append(blank)
 
-    Y = np.stack(channels, axis=0)
-    return torch.tensor(Y, dtype=torch.float32)
+    y = np.stack(channels, axis=0)
+    return torch.tensor(y, dtype=torch.float32)
+
 
 def get_coco_mask():
     pass

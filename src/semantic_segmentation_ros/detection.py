@@ -1,6 +1,8 @@
-import torch
 import numpy as np
+import torch
+
 from semantic_segmentation_ros.networks import load_model
+
 
 class SemanticSegmentation:
     def __init__(self, model_name: str, encoder_name: str, encoder_weights: str, in_channels: int, classes: int, model_path: str, device: str):
@@ -31,9 +33,9 @@ class SemanticSegmentation:
             np.ndarray: A numpy array containing the predicted segmentation mask.
         """
         img = torch.from_numpy(img).unsqueeze(0).to(self.device)
-        
+
         with torch.no_grad():
             y_pred = self.model(img)
             y_pred = y_pred.argmax(1)
-        
+
         return y_pred.cpu().squeeze(0).numpy()

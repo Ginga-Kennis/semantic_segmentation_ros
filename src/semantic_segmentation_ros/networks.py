@@ -1,5 +1,6 @@
-import torch
 import segmentation_models_pytorch as smp
+import torch
+
 
 def get_model(model_name: str, encoder_name: str, encoder_weights: str, in_channels: int, classes: int) -> torch.nn.Module:
     """
@@ -15,18 +16,14 @@ def get_model(model_name: str, encoder_name: str, encoder_weights: str, in_chann
     Returns:
         torch.nn.Module: An instance of the specified segmentation model.
     """
-    models = {
-        "unet": smp.Unet,
-        "unetplusplus": smp.UnetPlusPlus,
-        "deeplabv3": smp.DeepLabV3,
-        "deeplabv3plus": smp.DeepLabV3Plus
-    }
+    models = {"unet": smp.Unet, "unetplusplus": smp.UnetPlusPlus, "deeplabv3": smp.DeepLabV3, "deeplabv3plus": smp.DeepLabV3Plus}
 
     if model_name not in models:
-        raise ValueError(f"Unknown model type: {model}")
-    
+        raise ValueError(f"Unknown model type: {model_name}")
+
     model = models[model_name]
     return model(encoder_name=encoder_name, encoder_weights=encoder_weights, in_channels=in_channels, classes=classes)
+
 
 def load_model(model_name: str, encoder_name: str, encoder_weights: str, in_channels: int, classes: int, path: str, device: str) -> torch.nn.Module:
     """

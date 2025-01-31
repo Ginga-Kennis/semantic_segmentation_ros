@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 
-import rospy
 import cv_bridge
-import torch
 import numpy as np
+import rospy
+import torch
 from sensor_msgs.msg import Image
 
 from semantic_segmentation_ros.detection import SemanticSegmentation
 from semantic_segmentation_ros.rviz import Visualizer
 from semantic_segmentation_ros.srv import GetSegmentedImage, GetSegmentedImageResponse
+
 
 class SemanticSegmentationServer:
     def __init__(self) -> None:
@@ -29,7 +30,7 @@ class SemanticSegmentationServer:
         self.vis = Visualizer(self.classes)
 
         rospy.loginfo("Semantic Segmentation Server is ready")
-    
+
     def load_parameters(self) -> None:
         """
         Load parameters from the ROS parameter server necessary for the node's operation, including topics, model details, and paths.
@@ -66,24 +67,22 @@ class SemanticSegmentationServer:
 
     def rgb_image_callback(self, msg: Image) -> None:
         """
-        Callback function for the color image subscriber. 
+        Callback function for the color image subscriber.
         Converts ROS image messages to CV2 image arrays, processes them through the segmentation model, and publishes the resulting mask and segmented images.
 
         Inputs: msg (Image) - The received image message
         Outputs: None
         """
         try:
-            mask_pred = self.segmentation_model.predict(
-                self.cv_bridge.imgmsg_to_cv2(msg, "rgb8").transpose(2,0,1).astype(np.float32)
-            )
+            mask_pred = self.segmentation_model.predict(self.cv_bridge.imgmsg_to_cv2(msg, "rgb8").transpose(2, 0, 1).astype(np.float32))
 
             # publish mask
             self.latest_mask_pred = self.cv_bridge.cv2_to_imgmsg(mask_pred.astype(np.uint8), "mono8")
             self.segmentation_mask_pub.publish(self.latest_mask_pred)
 
             # publish image
-            self.vis.publish_segmented_image(mask_pred) 
-            
+            self.vis.publish_segmented_image(mask_pred)
+
         except Exception as e:
             rospy.logerr(f"Failed to Process Image : {e}")
 

@@ -44,15 +44,15 @@ class SegDataset(Dataset):
         mask_path = os.path.join(self.ann_path, self.anns[idx])
 
         img = get_rgb_img_tensor(img_path)
-        mask = get_labelme_mask_tensor(mask_path, self.labels) 
+        mask = get_labelme_mask_tensor(mask_path, self.labels)
 
-        if self.is_train == True and self.augment == True:
+        if self.is_train and self.augment:
             img, mask = self.trans(tv_tensors.Image(img), tv_tensors.Mask(mask))
 
         mask = add_background(mask)
         # vis_img_mask(img, mask)
         return img, mask
-    
+
 def build_transform(augmentations: dict) -> transforms.Compose:
     """
     Builds a composed torchvision transformation based on augmentation settings.
@@ -64,16 +64,16 @@ def build_transform(augmentations: dict) -> transforms.Compose:
 
     if augmentations["affine"]["enable"]:
         transform_list.append(transforms.RandomAffine(degrees=augmentations["affine"]["rotate"], translate=augmentations["affine"]["translate"], scale=augmentations["affine"]["scale"], shear=augmentations["affine"]["shear"]))
-    
+
     if augmentations["perspective"]["enable"]:
         transform_list.append(transforms.RandomPerspective(distortion_scale=augmentations["perspective"]["distortion_scale"], p=augmentations["perspective"]["p"]))
-    
+
     if augmentations["elastic"]["enable"]:
         transform_list.append(transforms.ElasticTransform(alpha=augmentations["elastic"]["alpha"], sigma=augmentations["elastic"]["sigma"]))
-    
+
     trans = transforms.Compose(transform_list)
     return trans
-    
+
 def add_background(mask: torch.Tensor) -> torch.Tensor:
     """
     Adds a background channel to the mask tensor.

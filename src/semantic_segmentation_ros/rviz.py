@@ -1,18 +1,19 @@
-import rospy
 import cv2
 import cv_bridge
 import numpy as np
+import rospy
 from sensor_msgs.msg import Image
 
+
 class Visualizer:
-    def __init__(self,classes: int):
+    def __init__(self, classes: int):
         """
         Initialize the Visualizer object with the number of classes.
 
         Input:
             classes (int): Total number of classes, including background.
         """
-        self.classes = classes - 1 # Exclude background
+        self.classes = classes - 1  # Exclude background
         self.cv_bridge = cv_bridge.CvBridge()
         self.colors = self.generate_colors()
         self.create_segmented_image_publisher()
@@ -30,7 +31,7 @@ class Visualizer:
         hsv_colors = np.stack([hues, saturation, value], axis=-1)
         rgb_colors = cv2.cvtColor(hsv_colors.reshape(1, -1, 3), cv2.COLOR_HSV2BGR).reshape(-1, 3)
         return np.vstack([rgb_colors, np.array([0, 0, 0], dtype=np.uint8)])
-    
+
     def create_segmented_image_publisher(self) -> None:
         """
         Create a ROS publisher for the segmented images.
@@ -47,4 +48,3 @@ class Visualizer:
         seg_img = self.colors[mask_pred]
         msg = self.cv_bridge.cv2_to_imgmsg(seg_img, "rgb8")
         self.segmentation_image_pub.publish(msg)
-    
